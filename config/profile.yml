@@ -1,0 +1,89 @@
+# Career-Ops Profile Configuration
+# This is the single source of truth for your personal data across all modes.
+
+candidate:
+    full_name: "Fabricio Tramontano Pirini"
+    email: "fabricio@fabriciopirini.com"
+    phone: "+55-XXX-XXX-XXXX"
+    location: "Brazil (UTC -3)"
+    linkedin: "linkedin.com/in/fabriciopirini"
+    portfolio_url: "https://fabriciopirini.com"
+    github: "github.com/fabriciopirini"
+    twitter: ""
+
+target_roles:
+    # Your North Star roles — what you're optimizing for
+    primary:
+        - "Senior Software Engineer"
+        - "Staff Frontend Engineer"
+        - "Design System Engineer"
+        - "Developer Experience Engineer"
+        - "Growth Engineer"
+    # Archetypes help the evaluation system score fit
+    archetypes:
+        - name: "Frontend Engineer"
+          level: "Senior/Staff"
+          fit: "primary"
+        - name: "Design System Engineer"
+          level: "Senior"
+          fit: "primary"
+        - name: "Growth Engineer"
+          level: "Senior"
+          fit: "primary"
+        - name: "Developer Experience"
+          level: "Senior"
+          fit: "secondary"
+        - name: "Full Stack Engineer"
+          level: "Mid-Senior"
+          fit: "adjacent"
+
+narrative:
+    # Your professional headline (1 line)
+    headline: "Senior Frontend Engineer who builds foundational systems: design systems, testing pipelines, shared packages"
+    # Your exit story — what makes you unique
+    exit_story: "Nearly 9 years building at scale across 3 countries. Led teams at Norwegian scale-ups, built the first A/B experimentation program at Oda (2-4 experiments/month), now owning design systems at Kraken shipping to 4 platforms. Selected by Chief Growth Officer for Growth Academy. Core strength: reducing complexity through systems—design tokens, component libraries, testing infrastructure."
+    # Your top 3-5 superpowers
+    superpowers:
+        - "Design systems and theming infrastructure (Figma-to-code pipelines, multi-brand variants)"
+        - "Building from scratch: A/B experimentation programs, CI/CD, testing pipelines, component libraries"
+        - "International localization: removed hard-coded configs, opened Finland and Germany markets"
+        - "Accessibility engineering: WCAG 2.0 AA compliance across 70+ properties"
+    # Proof points — projects, articles, case studies with measurable impact
+    proof_points:
+        - name: "A/B Experimentation Platform"
+          url: ""
+          hero_metric: "Built first program at Oda, ran 2-4 experiments/month through 2x headcount growth"
+        - name: "Visual Regression Testing"
+          url: ""
+          hero_metric: "Cut runtime from 12 min to under 1 min, tripled coverage"
+        - name: "Shared Component Library"
+          url: ""
+          hero_metric: "Used by 3 product teams, ~25% feature cycle time reduction"
+        - name: "Microservices Refactor"
+          url: ""
+          hero_metric: "120x runtime reduction, 10x resource reduction"
+    # Optional: dashboard/demo URL with credentials
+    # dashboard:
+    #   url: ""
+    #   password: ""
+
+compensation:
+    target_range: "$80K-120K" # Your target total comp
+    currency: "USD"
+    minimum: "$70K" # Walk-away number
+    location_flexibility: "Remote-first, open to occasional travel"
+
+location:
+    country: "Brazil"
+    city: "São Paulo area"
+    timezone: "UTC -3"
+    visa_status: "Brazilian citizen, remote work authorized"
+    # For remote roles outside your country:
+    onsite_availability: "Available for occasional on-site visits (1-2 weeks/year)"
+
+cv:
+    output_format: "html" # "html" (default) or "latex"
+    # (Optional) Canva resume design ID for visual CV generation via /career-ops pdf.
+    # Find it in your Canva design URL: https://www.canva.com/design/DAxxxxxxx/...
+    # The ID starts with "D" and is 11 characters long.
+    # canva_resume_design_id: "DAxxxxxxxxx"

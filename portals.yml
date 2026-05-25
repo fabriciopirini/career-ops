@@ -1,0 +1,580 @@
+# Portal Scanner Configuration
+# Used by /career-ops scan to discover new offers automatically.
+#
+# Strategy (4 levels):
+#   0. Local parser → per-company `parser:` script for SSR/static career pages (zero-token)
+#   1. Playwright → careers_url of each company (real-time, reliable)
+#   2. HTTP JSON (WebFetch) → per-company `api:` on tracked_companies (see board_api_catalog below)
+#   3. WebSearch with site: filters (broad discovery, may be stale)
+#
+# IMPORTANT: Each company in tracked_companies MUST have careers_url.
+#   Prefer the BRANDED company careers URL whenever available; use ATS-hosted URL only as fallback.
+#   ✅ https://careers.mastercard.com   ⚠️ https://mastercard.wd1.myworkdayjobs.com (fallback only)
+#   ✅ https://openai.com/careers       ⚠️ https://job-boards.greenhouse.io/openai (fallback only)
+#   Exception: ATS-hosted careers_url is acceptable when no branded careers page exists.
+#   Using raw ATS URLs when a branded page exists can cause false 410 errors (job ID mismatch).
+#
+# HOW TO CUSTOMIZE:
+#   1. Copy this file to portals.yml in the project root
+#   2. Edit title_filter.positive with YOUR target role keywords
+#   3. Add/remove companies in tracked_companies
+#   4. Adjust search_queries for your preferred job boards
+#   5. Set enabled: false on companies you don't care about
+
+# -- Location filter (optional) --
+# Filter scanned jobs by location. Applied AFTER title filter, BEFORE dedup.
+# If this entire block is absent, all locations pass (current default behavior).
+
+location_filter:
+    # Priority order: Global remote → LATAM remote → Brazil remote
+    # always_allow = strong remote signals that rescue multi-location posts from block list
+    always_allow:
+        - "Global"
+        - "Worldwide"
+        - "Any location"
+        - "Anywhere"
+        - "LATAM"
+        - "Latin America"
+    allow:
+        - "Remote"
+        - "USA"
+        - "United States"
+        - "Canada"
+        - "South America"
+        - "Brazil"
+        - "Brasil"
+    block:
+        - "India"
+        - "Bengaluru"
+        - "United Kingdom"
+        - "London"
+        - "Singapore"
+        - "Japan"
+        - "Australia"
+        - "São Paulo"
+        - "Rio de Janeiro"
+        - "Brasília"
+        - "São Paulo, Brazil"
+
+# -- Title filter --
+# The scanner uses these keywords to decide if a title is relevant.
+# At least 1 positive must match AND 0 negatives must match (case-insensitive).
+
+title_filter:
+    positive:
+        # [CUSTOMIZE] Add keywords matching YOUR target roles
+        # -- Primary Roles --
+        - "Senior Product Engineer"
+        - "Senior Frontend Engineer"
+        - "Senior Front-end Engineer"
+        - "Senior Front End Engineer"
+        - "Senior Software Engineer"
+        - "Senior Fullstack Engineer"
+        - "Senior Full Stack Engineer"
+        - "Lead Software Engineer"
+        - "Lead Frontend Engineer"
+        - "Lead Product Engineer"
+        - "Engineering Lead"
+        # -- Acceptable Roles --
+        - "Product Engineer"
+        - "Frontend Engineer"
+        - "Front-end Engineer"
+        - "Front End Engineer"
+        - "Software Engineer"
+        - "Fullstack Engineer"
+        - "Full Stack Engineer"
+        - "Design Engineer"
+        - "Engineer"
+        # -- Tech Stack Signals --
+        - "React"
+        - "Next.js"
+        - "TypeScript"
+        - "Frontend"
+        - "Front-end"
+        - "Front End"
+        - "Web"
+        # -- Seniority (boost but not required) --
+        - "Senior"
+        - "Lead"
+    negative:
+        # [CUSTOMIZE] Add keywords for roles you want to exclude
+        - "Developer Experience"
+        - "DevEx"
+        - "DX Engineer"
+        - "Developer Relations"
+        - "DevRel"
+        - "Developer Advocate"
+        - "Accessibility Engineer"
+        - "a11y Engineer"
+        - "WCAG Engineer"
+        - "QA Engineer"
+        - "Test Engineer"
+        - "Quality Engineer"
+        - ".NET"
+        - "Java "
+        - "iOS"
+        - "Android"
+        - "PHP"
+        - "Ruby"
+        - "Embedded"
+        - "Firmware"
+        - "FPGA"
+        - "ASIC"
+        - "Blockchain"
+        - "Web3"
+        - "Crypto"
+        - "Solidity"
+        - "Smart Contract"
+        - "DevOps"
+        - "SRE"
+        - "Site Reliability"
+        - "Data Science"
+        - "Machine Learning"
+        - "ML Engineer"
+        - "AI Engineer"
+        - "Sales"
+        - "Sales Engineer"
+        - "Solutions Engineer"
+        - "Marketing"
+        - "Recruiter"
+    seniority_boost:
+        # These prefixes add relevance but are not required
+        - "Senior"
+        - "Lead"
+
+# -- Search queries --
+# Each query triggers a WebSearch. Use site: to filter by portal.
+# The scanner extracts title, URL, and company from results.
+
+search_queries:
+    # -- Ashby --
+
+    - name: Ashby - Senior Product/Frontend
+      query: 'site:jobs.ashbyhq.com "Senior Product Engineer" OR "Senior Frontend Engineer" OR "Senior Software Engineer" remote'
+      enabled: true
+
+    - name: Ashby - Product Engineer
+      query: 'site:jobs.ashbyhq.com "Product Engineer" remote'
+      enabled: true
+
+    - name: Ashby - Frontend Engineer
+      query: 'site:jobs.ashbyhq.com "Frontend Engineer" OR "Front-end Engineer" remote'
+      enabled: true
+
+    - name: Ashby - Fullstack Engineer
+      query: 'site:jobs.ashbyhq.com "Fullstack Engineer" OR "Full Stack Engineer" remote'
+      enabled: true
+
+    - name: Ashby - Design Engineer
+      query: 'site:jobs.ashbyhq.com "Design Engineer" remote'
+      enabled: true
+
+    # -- Greenhouse --
+
+    - name: Greenhouse - Senior Product/Frontend
+      query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io "Senior Product Engineer" OR "Senior Frontend Engineer" OR "Senior Software Engineer" remote'
+      enabled: true
+
+    - name: Greenhouse - Product Engineer
+      query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io "Product Engineer" remote'
+      enabled: true
+
+    - name: Greenhouse - Frontend Engineer
+      query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io "Frontend Engineer" OR "Front-end Engineer" remote'
+      enabled: true
+
+    - name: Greenhouse - Software Engineer
+      query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io "Software Engineer" remote'
+      enabled: true
+
+    - name: Greenhouse - React/Next.js
+      query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io "React" OR "Next.js" OR "TypeScript" senior remote'
+      enabled: true
+
+    # -- Workable --
+
+    - name: Workable - Product/Frontend Roles
+      query: 'site:apply.workable.com "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" senior remote'
+      enabled: true
+
+    # -- Remote-friendly boards --
+
+    - name: Remotive - Product/Frontend
+      query: 'site:remotive.com "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" Europe'
+      enabled: true
+
+    - name: WeWorkRemotely - Frontend
+      query: 'site:weworkremotely.com "Frontend Engineer" OR "Software Engineer" OR "React"'
+      enabled: true
+
+    - name: Working Nomads - Frontend
+      query: 'site:workingnomads.com "Frontend Engineer" OR "Software Engineer" OR "React"'
+      enabled: true
+
+    - name: EU Remote Jobs - Frontend
+      query: 'site:euremotejobs.com "Frontend Engineer" OR "Software Engineer" OR "React"'
+      enabled: true
+
+    - name: RemoteOK - Frontend
+      query: 'site:remoteok.com "Frontend Engineer" OR "Software Engineer" OR "React"'
+      enabled: true
+
+    - name: Himalayas - Remote Frontend
+      query: 'site:himalayas.app "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" Europe'
+      enabled: true
+
+    - name: HN Who's Hiring - Remote Frontend
+      query: 'site:news.ycombinator.com OR site:hnrss.org "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" remote'
+      enabled: true
+
+# -- Tracked companies --
+# Companies whose career pages are checked directly.
+# scan_method: playwright (default), websearch, local_parser
+# For Greenhouse companies, add api: field for faster structured JSON access.
+
+tracked_companies:
+    # -- Developer Tools (DX culture, frontend-heavy) --
+
+    - name: Vercel
+      careers_url: https://job-boards.greenhouse.io/vercel
+      api: https://boards-api.greenhouse.io/v1/boards/vercel/jobs
+      notes: "Next.js company. Strong DX culture."
+      enabled: true
+
+    - name: Supabase
+      careers_url: https://jobs.ashbyhq.com/supabase
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/supabase "Engineer" OR "Frontend"'
+      notes: "Open-source Firebase alternative. Remote-first."
+      enabled: true
+
+    - name: Clerk
+      careers_url: https://jobs.ashbyhq.com/clerk
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/clerk "Engineer" OR "Frontend"'
+      notes: "Auth & user management for developers."
+      enabled: true
+
+    - name: Inngest
+      careers_url: https://jobs.ashbyhq.com/inngest
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/inngest "Engineer" OR "Frontend"'
+      notes: "Durable workflow engine for serverless."
+      enabled: true
+
+    - name: WorkOS
+      careers_url: https://jobs.ashbyhq.com/workos
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/workos "Engineer" OR "Frontend"'
+      notes: "Developer tools and enterprise-ready auth/platform APIs."
+      enabled: true
+
+    - name: Resend
+      careers_url: https://jobs.ashbyhq.com/resend
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/resend "Engineer" OR "Frontend"'
+      notes: "Email API for developers. Remote-first."
+      enabled: true
+
+    - name: PlanetScale
+      careers_url: https://job-boards.greenhouse.io/planetscale
+      api: https://boards-api.greenhouse.io/v1/boards/planetscale/jobs
+      notes: "Serverless MySQL platform."
+      enabled: true
+
+    - name: Temporal
+      careers_url: https://job-boards.greenhouse.io/temporal
+      api: https://boards-api.greenhouse.io/v1/boards/temporal/jobs
+      notes: "Workflow orchestration."
+      enabled: true
+
+    - name: Prisma
+      careers_url: https://job-boards.greenhouse.io/prisma
+      api: https://boards-api.greenhouse.io/v1/boards/prisma/jobs
+      notes: "Database toolkit for TypeScript. Great DX culture."
+      enabled: true
+
+    - name: Linear
+      careers_url: https://jobs.ashbyhq.com/linear
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/linear "Engineer" OR "Frontend"'
+      notes: "Issue tracking. Beautiful DX. Remote-first."
+      enabled: true
+
+    - name: Raycast
+      careers_url: https://jobs.ashbyhq.com/raycast
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/raycast "Engineer" OR "Frontend"'
+      notes: "Mac productivity launcher. Remote-first, strong DX."
+      enabled: true
+
+    # -- E-commerce / Scale-ups (relevant experience) --
+
+    - name: Shopify
+      careers_url: https://job-boards.greenhouse.io/shopify
+      api: https://boards-api.greenhouse.io/v1/boards/shopify/jobs
+      notes: "E-commerce platform. Remote-first, strong design systems."
+      enabled: true
+
+    - name: Klaviyo
+      careers_url: https://job-boards.greenhouse.io/klaviyo
+      api: https://boards-api.greenhouse.io/v1/boards/klaviyo/jobs
+      notes: "E-commerce marketing. Remote-first."
+      enabled: true
+
+    - name: BigCommerce
+      careers_url: https://job-boards.greenhouse.io/bigcommerce
+      api: https://boards-api.greenhouse.io/v1/boards/bigcommerce/jobs
+      notes: "E-commerce platform."
+      enabled: true
+
+    # -- Growth / Analytics companies (experimentation experience) --
+
+    - name: Mixpanel
+      careers_url: https://job-boards.greenhouse.io/mixpanel
+      api: https://boards-api.greenhouse.io/v1/boards/mixpanel/jobs
+      notes: "Product analytics. Growth-focused."
+      enabled: true
+
+    - name: Amplitude
+      careers_url: https://job-boards.greenhouse.io/amplitude
+      api: https://boards-api.greenhouse.io/v1/boards/amplitude/jobs
+      notes: "Product analytics. Growth-focused."
+      enabled: true
+
+    - name: PostHog
+      careers_url: https://jobs.ashbyhq.com/posthog
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/posthog "Engineer" OR "Frontend"'
+      notes: "Open-source product analytics. Growth experimentation."
+      enabled: true
+
+    - name: GrowthBook
+      careers_url: https://jobs.ashbyhq.com/growthbook
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/growthbook "Engineer" OR "Frontend"'
+      notes: "A/B testing platform. Growth experimentation."
+      enabled: true
+
+    - name: Optimizely
+      careers_url: https://job-boards.greenhouse.io/optimizely
+      api: https://boards-api.greenhouse.io/v1/boards/optimizely/jobs
+      notes: "Experimentation platform."
+      enabled: true
+
+    - name: Statsig
+      careers_url: https://jobs.ashbyhq.com/statsig
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/statsig "Engineer" OR "Frontend"'
+      notes: "Feature flagging and experimentation."
+      enabled: true
+
+    - name: LaunchDarkly
+      careers_url: https://job-boards.greenhouse.io/launchdarkly
+      api: https://boards-api.greenhouse.io/v1/boards/launchdarkly/jobs
+      notes: "Feature flagging platform."
+      enabled: true
+
+    - name: Unleash
+      careers_url: https://job-boards.greenhouse.io/unleash
+      api: https://boards-api.greenhouse.io/v1/boards/unleash/jobs
+      notes: "Open-source feature flagging. Norwegian-origin."
+      enabled: true
+
+    # -- European tech (EMEA-friendly) --
+
+    - name: Factorial
+      careers_url: https://job-boards.greenhouse.io/factorial
+      scan_method: websearch
+      scan_query: "site:jobs.greenhouse.io/factorial"
+      notes: "Barcelona. HR SaaS unicorn."
+      enabled: true
+
+    - name: Tinybird
+      careers_url: https://jobs.ashbyhq.com/tinybird
+      scan_method: websearch
+      scan_query: "site:tinybird.co/careers OR site:jobs.ashbyhq.com/tinybird"
+      notes: "Remote. Real-time data platform."
+      enabled: true
+
+    - name: Travelperk
+      careers_url: https://jobs.ashbyhq.com/travelperk
+      scan_method: websearch
+      scan_query: "site:jobs.ashbyhq.com/travelperk"
+      notes: "Barcelona. Business travel unicorn."
+      enabled: true
+
+    - name: Personio
+      careers_url: https://job-boards.greenhouse.io/personio
+      api: https://boards-api.greenhouse.io/v1/boards/personio/jobs
+      notes: "Munich. HR software unicorn."
+      enabled: true
+
+    - name: Contentful
+      careers_url: https://job-boards.greenhouse.io/contentful
+      api: https://boards-api.greenhouse.io/v1/boards/contentful/jobs
+      notes: "Berlin / Denver. Headless CMS, AI content workflows."
+      enabled: true
+
+    - name: GetYourGuide
+      careers_url: https://job-boards.greenhouse.io/getyourguide
+      api: https://boards-api.greenhouse.io/v1/boards/getyourguide/jobs
+      notes: "Berlin. Travel marketplace."
+      enabled: true
+
+    - name: HelloFresh
+      careers_url: https://job-boards.greenhouse.io/hellofresh
+      api: https://boards-api.greenhouse.io/v1/boards/hellofresh/jobs
+      notes: "Berlin. Meal kit unicorn."
+      enabled: true
+
+    # -- Fintech (relevant experience) --
+
+    - name: Nubank
+      careers_url: https://job-boards.greenhouse.io/nubank
+      api: https://boards-api.greenhouse.io/v1/boards/nubank/jobs
+      notes: "Brazil. Digital bank unicorn. Remote-friendly."
+      enabled: true
+
+    - name: N26
+      careers_url: https://job-boards.greenhouse.io/n26
+      api: https://boards-api.greenhouse.io/v1/boards/n26/jobs
+      notes: "Berlin / Barcelona. Mobile bank."
+      enabled: true
+
+    - name: Trade Republic
+      careers_url: https://job-boards.greenhouse.io/traderepublicbank
+      api: https://boards-api.greenhouse.io/v1/boards/traderepublicbank/jobs
+      notes: "Berlin / London / Paris. Neobroker."
+      enabled: true
+
+    - name: Revolut
+      careers_url: https://job-boards.greenhouse.io/revolut
+      api: https://boards-api.greenhouse.io/v1/boards/revolut/jobs
+      notes: "London / Berlin. Fintech unicorn."
+      enabled: true
+
+    - name: Wise
+      careers_url: https://job-boards.greenhouse.io/wise
+      api: https://boards-api.greenhouse.io/v1/boards/wise/jobs
+      notes: "London / Brussels. Money transfer. Remote-friendly."
+      enabled: true
+
+    - name: Brex
+      careers_url: https://job-boards.greenhouse.io/brex
+      api: https://boards-api.greenhouse.io/v1/boards/brex/jobs
+      notes: "US fintech for startups. Strong engineering culture."
+      enabled: true
+
+    - name: Stripe
+      careers_url: https://job-boards.greenhouse.io/stripe
+      api: https://boards-api.greenhouse.io/v1/boards/stripe/jobs
+      notes: "Payments infrastructure. Remote-first, strong DX."
+      enabled: true
+
+    - name: Payward (Kraken)
+      careers_url: https://job-boards.greenhouse.io/kraken
+      api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
+      notes: "Crypto exchange. Remote-friendly, strong frontend org. Current employer."
+      enabled: true
+
+    - name: Coinbase
+      careers_url: https://job-boards.greenhouse.io/coinbase
+      api: https://boards-api.greenhouse.io/v1/boards/coinbase/jobs
+      notes: "US crypto exchange. Remote-friendly, strong frontend org."
+      enabled: false
+
+    - name: Kraken
+      careers_url: https://job-boards.greenhouse.io/kraken
+      api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
+      notes: "Crypto exchange. Remote-friendly. Duplicate - see Payward entry."
+      enabled: false
+
+    # -- Norwegian companies (past experience) --
+
+    - name: Oda
+      careers_url: https://job-boards.greenhouse.io/oda
+      api: https://boards-api.greenhouse.io/v1/boards/oda/jobs
+      notes: "Oslo. Online grocery. Past employer."
+      enabled: true
+
+    - name: Vipps
+      careers_url: https://job-boards.greenhouse.io/vipps
+      api: https://boards-api.greenhouse.io/v1/boards/vipps/jobs
+      notes: "Oslo. Mobile payments. Norwegian unicorn."
+      enabled: true
+
+    - name: Schibsted
+      careers_url: https://job-boards.greenhouse.io/schibsted
+      api: https://boards-api.greenhouse.io/v1/boards/schibsted/jobs
+      notes: "Oslo. Media marketplace company."
+      enabled: true
+
+    - name: Kolonial
+      careers_url: https://job-boards.greenhouse.io/kolonial
+      api: https://boards-api.greenhouse.io/v1/boards/kolonial/jobs
+      notes: "Oslo. Online grocery (competitor to Oda)."
+      enabled: true
+
+    # -- AI companies with frontend needs --
+
+    - name: OpenAI
+      careers_url: https://openai.com/careers
+      scan_method: websearch
+      scan_query: 'site:openai.com/careers "Frontend" OR "React" OR "TypeScript" OR "Web" OR "Product Engineer"'
+      enabled: true
+
+    - name: Anthropic
+      careers_url: https://job-boards.greenhouse.io/anthropic
+      api: https://boards-api.greenhouse.io/v1/boards/anthropic/jobs
+      enabled: true
+
+    - name: Perplexity
+      careers_url: https://jobs.ashbyhq.com/perplexity
+      scan_method: websearch
+      scan_query: 'site:jobs.ashbyhq.com/perplexity "Frontend" OR "React" OR "TypeScript" OR "Web" OR "Product Engineer"'
+      enabled: true
+
+    - name: Hugging Face
+      careers_url: https://apply.workable.com/huggingface/
+      scan_method: websearch
+      scan_query: 'site:apply.workable.com/huggingface "Frontend" OR "React" OR "Product Engineer"'
+      notes: "Paris / NYC / Remote. Frontend-focused roles."
+      enabled: true
+
+    # -- Turkish market (disabled by default) --
+
+    - name: Trendyol
+      careers_url: https://www.trendyol.com/kariyerimiz
+      scan_method: websearch
+      scan_query: 'site:trendyol.com/kariyerimiz OR "trendyol" "Frontend" OR "React" OR "TypeScript" OR "Software Engineer"'
+      notes: "Istanbul. Turkey's largest e-commerce platform."
+      enabled: false
+
+    - name: Hepsiburada
+      careers_url: https://www.hepsiburada.com/kariyer
+      scan_method: websearch
+      scan_query: '"hepsiburada" careers "Frontend" OR "React" OR "TypeScript" OR "Software Engineer"'
+      notes: "Istanbul. Major Turkish e-commerce platform."
+      enabled: false
+
+    - name: Getir
+      careers_url: https://jobs.lever.co/getir
+      scan_method: websearch
+      scan_query: 'site:jobs.lever.co/getir OR "getir" careers "Frontend" OR "React" OR "TypeScript" OR "Software Engineer"'
+      notes: "Istanbul. Ultra-fast delivery unicorn."
+      enabled: false
+
+    - name: Insider
+      careers_url: https://useinsider.com/careers
+      scan_method: websearch
+      scan_query: '"useinsider" OR "insider" careers "Frontend" OR "React" OR "TypeScript" OR "Software Engineer" site:jobs.lever.co OR site:jobs.ashbyhq.com'
+      notes: "Istanbul. B2B SaaS marketing platform. Unicorn."
+      enabled: false
+
+    - name: Dream Games
+      careers_url: https://www.dreamgames.com/careers
+      scan_method: websearch
+      scan_query: '"dreamgames" OR "dream games" careers "Frontend" OR "React" OR "TypeScript" OR "Software Engineer"'
+      notes: "Istanbul. Mobile gaming company."
+      enabled: false
