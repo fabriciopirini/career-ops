@@ -1,0 +1,47 @@
+Company	Title	Location	Seniority	Role Type	Tech Stack	Remote	Portal	URL
+Supabase	Multigres Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/2e718684-4f75-4a99-8d6b-3b6bd44e4228
+Supabase	Postgres Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/c16bd707-29f2-46fb-8409-7270ff00978b
+Supabase	Multigres Deployment Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/f035bda1-b5d3-4c5b-8736-b9c335fe1c3b
+Supabase	SDK Engineer - Kotlin	Remote	Mid	Engineering	Kotlin	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/ad92f53a-6d0f-4761-abc3-588c7c7c6cd8
+Supabase	Postgres Deployment Engineer (Nix)	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/48950725-e0d9-4025-92d9-f75e1b60ce45
+Supabase	Software Engineer (Go) - Auth	Remote	Mid	Engineering	Go	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/77439e1c-e4eb-483c-aa8e-7686913886e3
+Supabase	Platform Engineer - Multicloud	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/847a7bd7-6b75-444a-aeda-d0b28a11c764
+Supabase	Design Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/2e6ee4b3-6573-477f-9c95-d1221cd9f9f9
+Supabase	CLI Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/dd3f74dc-29f8-46b1-bcfb-b7f090b7146a
+Supabase	Software Engineer: IaC Platform Experience	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/b7206c22-979f-444a-809b-e70d9ee23c7f
+Supabase	Edge Functions Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/supabase/3ab0b926-c9b5-4197-aff2-88d5bf009e13
+PostHog	Product Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/posthog/20ab9628-20ff-4ae3-bd6a-46ae7e9dc6b8
+PostHog	Forward Deployed Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/posthog/28781aeb-eca4-4713-9a5f-a95b95d5d120
+Nubank	Staff Software Engineer | Investments	Brazil, Belo Horizonte; Brazil, Sao Paulo	Staff	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/7686613
+Nubank	Staff Software Engineer | Loyalty 	Brazil, Sao Paulo	Staff	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/7735439
+Nubank	Staff Software Engineer | NuPay	Argentina, Buenos Aires; Brazil, Campinas; Brazil, Sao Paulo; Canada, Toronto	Staff	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/7769785
+Nubank	Staff Software Engineer - PJ	Brazil, Belo Horizonte; Brazil, Sao Paulo	Staff	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/7904110
+Stripe	Staff Full Stack Engineer, Identity	Remote	Staff	Fullstack	N/A	Yes	greenhouse-api	https://stripe.com/jobs/search?gh_jid=7895467
+Assured	Staff Application Platform Engineer (DX)	Remote	Staff	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/assured/ade28ada-8ac9-4dfa-83f3-1bc6a2c1b040
+Assured	Staff Software Engineer, Platform	Remote	Staff	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/assured/06c42e5b-0150-471d-8061-8faf85e82d90
+Assured	Staff Cloud Infrastructure Engineer	Remote	Staff	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/assured/2624a7c0-ddc1-4708-82aa-54fd4cf6e25f
+Assured	Staff Full Stack Engineer 	Remote	Staff	Fullstack	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/assured/d9fd1cec-1c4b-40ee-8939-f4fc886d768c
+Assured	Staff Frontend Engineer	Remote	Staff	Frontend	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/assured/2792eed3-f3e7-4a11-9d26-24bcef1a32ef
+Buffer	Senior Growth Engineer	Remote	Senior	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/buffer/6ee07995-2738-4cee-b16d-fc8967674346
+Mural	Senior Software Engineer, Canvas Core	Argentina Remote	Senior	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/mural/a88e5ba1-8a57-4096-ae84-294cc78d96d5
+Ramp	Software Engineer, Argentina	Remote (Buenos Aires, Argentina)	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/ramp/9320454f-f2ca-4c19-82d2-b51b8d75fd3a
+Wynd Labs	Full Stack Engineer	remote	Mid	Fullstack	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/wynd-labs/96a745b2-d6e3-4b6a-bbc6-68fc34ea81dd
+Wynd Labs	Research Crawling Engineer	Remote	Mid	Engineering	N/A	Yes	ashby-api	https://jobs.ashbyhq.com/wynd-labs/8aa370f3-8e80-44d4-aa9f-c28296d43efd
+Infisical	Senior Full Stack Engineer (Americas)	North to South America	Senior	Fullstack	N/A	No	ashby-api	https://jobs.ashbyhq.com/infisical/67d33206-c8f2-4e40-8af2-9eea1c05b31e
+Infisical	Full Stack Engineer (Americas)	North to South America	Mid	Fullstack	N/A	No	ashby-api	https://jobs.ashbyhq.com/infisical/782b9da8-20e1-48b2-919e-6c5430c58628
+Infisical	Design Engineer, Platform (Americas)	North to South America	Mid	Engineering	N/A	No	ashby-api	https://jobs.ashbyhq.com/infisical/ee25fbbb-c3c6-4c51-a664-1539350616b9
+Infisical	Design Engineer, Site (Americas)	North to South America	Mid	Engineering	N/A	No	ashby-api	https://jobs.ashbyhq.com/infisical/558d171f-9730-47d6-8d35-1026c2c3e316
+Nubank	Senior Software Engineer	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo	Senior	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/6968954
+Nubank	Senior Staff Software Engineer | Investments	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo	Senior	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/7682141
+Nubank	Staff Software Engineer	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo	Staff	Engineering	N/A	No	greenhouse-api	https://job-boards.greenhouse.io/nubank/jobs/6973841
+Brex	Senior Software Engineer, Full Stack	São Paulo, São Paulo, Brazil	Senior	Fullstack	N/A	No	greenhouse-api	https://www.brex.com/careers/8477314002?gh_jid=8477314002
+Brex	Senior Software Engineer, Release Infra 	São Paulo, São Paulo, Brazil	Senior	Engineering	N/A	No	greenhouse-api	https://www.brex.com/careers/8522011002?gh_jid=8522011002
+Brex	Software Engineer, Forward Deployed Agent Builder	São Paulo, São Paulo, Brazil	Mid	Engineering	N/A	No	greenhouse-api	https://www.brex.com/careers/8523435002?gh_jid=8523435002
+Brex	Software Engineer II, Cloud Infrastructure	São Paulo, São Paulo, Brazil	Mid	Engineering	N/A	No	greenhouse-api	https://www.brex.com/careers/8558051002?gh_jid=8558051002
+Brex	Software Engineer II, Frontend	São Paulo, São Paulo, Brazil	Mid	Frontend	N/A	No	greenhouse-api	https://www.brex.com/careers/8310523002?gh_jid=8310523002
+Stripe	Full Stack Engineer, Developer Experience & Product Platform	N/A	Mid	Fullstack	N/A	No	greenhouse-api	https://stripe.com/jobs/search?gh_jid=6567104
+Stripe	Full Stack Engineer, Money as a Service	N/A	Mid	Fullstack	N/A	No	greenhouse-api	https://stripe.com/jobs/search?gh_jid=6606581
+Stripe	Full Stack Engineer, Web Presence and Platform	N/A	Mid	Fullstack	N/A	No	greenhouse-api	https://stripe.com/jobs/search?gh_jid=7436086
+Stripe	Staff Software Engineer, Stripe Scale & Bundles	N/A	Staff	Engineering	N/A	No	greenhouse-api	https://stripe.com/jobs/search?gh_jid=7718488
+Aleph	Software Engineer	Americas	Mid	Engineering	N/A	No	ashby-api	https://jobs.ashbyhq.com/aleph/95e768d4-05d2-482c-8bfc-83f4f2d84616
+Aleph	Frontend Engineer	Americas	Mid	Frontend	N/A	No	ashby-api	https://jobs.ashbyhq.com/aleph/00b1e5f7-146f-4f95-8fa3-286de1d1bd1d

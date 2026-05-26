@@ -226,6 +226,82 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 ---
 
+## Application Workflow
+
+This repo has been forked from `santifer/career-ops` and customized for **Fabricio Pirini**. The full application pipeline integrates the portfolio at `~/dev/portfolio` for resume generation.
+
+### 1. Evaluate (auto)
+Paste JD or URL → `oferta` mode triggers. Produces A-F + G report in `reports/`.
+
+### 2. Prepare application package
+
+```
+/skill:application-prep
+```
+
+The `application-prep` skill executes a 9-step workflow:
+
+| Step | What it does |
+|------|-------------|
+| 1 | Read evaluation report + portfolio data |
+| 2 | Customize `~/dev/portfolio/lib/career-data.ts` (subtitle, summary, bullets, skills per Block E) |
+| 3 | Render standalone resume HTML via `render-resume-html.mjs` (uses `tsx` to import TypeScript directly, no Next.js cache issues) |
+| 4 | Write matching cover letter HTML (same fonts, colors, layout as portfolio resume) |
+| 5 | Humanize all text per `/humanizer` patterns |
+| 6 | Normalize typography for ATS (em dashes, smart quotes, zero-width chars) |
+| 7 | Generate PDFs for resume + cover letter via Playwright |
+| 8 | Update tracker |
+| 9 | Show instructions to restore portfolio files |
+
+### 3. Iterate
+Review PDFs in `output/`. Request tweaks — I modify the portfolio data and regenerate.
+
+### 4. Restore portfolio
+When satisfied:
+
+```bash
+cd ~/dev/portfolio && git checkout -- lib/career-data.ts lib/site-config.ts
+```
+
+### 5. Apply
+I prepare form answers (3 bullets, cover letter text). You review. You submit. **I never click Submit.**
+
+### Files and Scripts
+
+| File | Purpose |
+|------|---------|
+| `.agents/skills/application-prep/SKILL.md` | Skill definition — full workflow |
+| `render-resume-html.mjs` | Imports portfolio TypeScript data via tsx, renders standalone HTML |
+| `generate-pdf-from-html.mjs` | HTML → PDF via Playwright |
+| `customize-resume.mjs` | Applies Block E customizations from evaluation report |
+| `normalize-typography.mjs` | ATS-safe typography normalization |
+| `output/` | Generated PDFs and HTML (gitignored) |
+
+### Resume Source of Truth
+
+- **Canonical data:** `~/dev/portfolio/lib/career-data.ts`
+- **Generated from:** Portfolio TypeScript (3 variants: default/growth/product)
+- **Fonts:** Source Sans 3 (body) + Roboto (headings), matching portfolio resume
+- **Accent color:** `#0395de`
+- **No Next.js dependency for PDF generation** — standalone HTML via tsx import
+
+### Remotes
+
+```
+origin    https://github.com/fabriciopirini/career-ops.git  (your fork)
+upstream  https://github.com/santifer/career-ops.git       (original)
+```
+
+To sync with upstream updates:
+
+```bash
+git pull upstream main
+```
+
+(Your custom files — cv.md, profile.yml, reports/, output/ — won't be affected.)
+
+---
+
 ## Ethical Use -- CRITICAL
 
 **This system is designed for quality, not quantity.** The goal is to help the user find and apply to roles where there is a genuine match -- not to spam companies with mass applications.

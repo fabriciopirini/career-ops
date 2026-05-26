@@ -8,10 +8,12 @@ location_filter:
     - Latin America
   allow:
     - Remote
+    - USA
+    - United States
+    - Canada
+    - South America
     - Brazil
     - Brasil
-    - AMER
-    - Americas
   block:
     - India
     - Bengaluru
@@ -20,34 +22,27 @@ location_filter:
     - Singapore
     - Japan
     - Australia
-    - Remote - US
-    - Remote - USA
-    - Remote - United States
-    - North America
-    - NAMER
-    - Remote - California
-    - Remote - New Jersey
-    - Remote - New York
-    - Remote - Georgia
-    - Remote - Texas
-    - Remote - Washington
-    - CA-Remote-British Columbia
-    - Toronto, Remote in Canada
-    - Remote-Friendly
-    - EMEA
-    - UK - Remote
-    - United Kingdom Remote
-    - Remote (EMEA)
 title_filter:
   positive:
-    - Software Engineer
-    - Fullstack Engineer
-    - Full Stack Engineer
+    - Senior Product Engineer
+    - Senior Frontend Engineer
+    - Senior Front-end Engineer
+    - Senior Front End Engineer
+    - Senior Software Engineer
+    - Senior Fullstack Engineer
+    - Senior Full Stack Engineer
+    - Lead Software Engineer
+    - Lead Frontend Engineer
+    - Lead Product Engineer
+    - Engineering Lead
+    - Product Engineer
     - Frontend Engineer
     - Front-end Engineer
     - Front End Engineer
+    - Software Engineer
+    - Fullstack Engineer
+    - Full Stack Engineer
     - Design Engineer
-    - Product Engineer
     - Engineer
     - React
     - Next.js
@@ -56,16 +51,15 @@ title_filter:
     - Front-end
     - Front End
     - Web
-    - CLI
-    - Platform
-    - Cloud Infrastructure
-    - Application Platform
+    - Senior
+    - Lead
   negative:
     - Backend
     - Back-end
     - Back End
     - Manager
     - Architect
+    - Staff
     - Principal
     - Executive
     - Mobile
@@ -78,8 +72,9 @@ title_filter:
     - Developer Advocate
     - QA Engineer
     - Test Engineer
+    - QA Engineer
+    - Test Engineer
     - Quality Engineer
-    - SDET
     - .NET
     - 'Java '
     - iOS
@@ -102,35 +97,14 @@ title_filter:
     - Machine Learning
     - ML Engineer
     - AI Engineer
-    - AI
-    - Analytics
-    - Data
-    - IT Engineer
+    - Sales
+    - Sales Engineer
     - Solutions Engineer
-    - Chief of Staff
-    - GTM
-    - Customer Reliability
-    - Support Engineer
-    - Support
-    - Platform Evangelist
-    - Evangelist
-    - Operations Engineer
-    - Ops
-    - Information Security
-    - DevInfra
-    - Partner Success
-    - Customer Success
-    - ML Ops
-    - Network Engineer
-    - Web Scraping
-    - Scraping
-    - Specialist
-    - Developer Experience
-    - Forward Deployed
-    - Security Engineer
-    - Evaluation
-    - Tech Lead
-    - Research
+    - Marketing
+    - Recruiter
+  seniority_boost:
+    - Senior
+    - Lead
 search_queries:
   - name: Ashby - Senior Product/Frontend
     query: site:jobs.ashbyhq.com "Senior Product Engineer" OR "Senior Frontend Engineer" OR "Senior Software Engineer" remote
@@ -233,10 +207,10 @@ tracked_companies:
     notes: Workflow orchestration.
     enabled: true
   - name: Prisma
-    careers_url: https://job-boards.greenhouse.io/prisma6
-    api: https://boards-api.greenhouse.io/v1/boards/prisma6/jobs
+    careers_url: https://job-boards.greenhouse.io/prisma
+    api: https://boards-api.greenhouse.io/v1/boards/prisma/jobs
     notes: Database toolkit for TypeScript. Great DX culture.
-    enabled: false
+    enabled: true
   - name: Linear
     careers_url: https://jobs.ashbyhq.com/linear
     scan_method: websearch
@@ -253,7 +227,7 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/shopify
     api: https://boards-api.greenhouse.io/v1/boards/shopify/jobs
     notes: E-commerce platform. Remote-first, strong design systems.
-    enabled: false
+    enabled: true
   - name: Klaviyo
     careers_url: https://job-boards.greenhouse.io/klaviyo
     api: https://boards-api.greenhouse.io/v1/boards/klaviyo/jobs
@@ -263,7 +237,7 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/bigcommerce
     api: https://boards-api.greenhouse.io/v1/boards/bigcommerce/jobs
     notes: E-commerce platform.
-    enabled: false
+    enabled: true
   - name: Mixpanel
     careers_url: https://job-boards.greenhouse.io/mixpanel
     api: https://boards-api.greenhouse.io/v1/boards/mixpanel/jobs
@@ -290,7 +264,7 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/optimizely
     api: https://boards-api.greenhouse.io/v1/boards/optimizely/jobs
     notes: Experimentation platform.
-    enabled: false
+    enabled: true
   - name: Statsig
     careers_url: https://jobs.ashbyhq.com/statsig
     scan_method: websearch
@@ -306,13 +280,13 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/unleash
     api: https://boards-api.greenhouse.io/v1/boards/unleash/jobs
     notes: Open-source feature flagging. Norwegian-origin.
-    enabled: false
+    enabled: true
   - name: Factorial
     careers_url: https://job-boards.greenhouse.io/factorial
     scan_method: websearch
     scan_query: site:jobs.greenhouse.io/factorial
     notes: Barcelona. HR SaaS unicorn.
-    enabled: false
+    enabled: true
   - name: Tinybird
     careers_url: https://jobs.ashbyhq.com/tinybird
     scan_method: websearch
@@ -329,7 +303,7 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/personio
     api: https://boards-api.greenhouse.io/v1/boards/personio/jobs
     notes: Munich. HR software unicorn.
-    enabled: false
+    enabled: true
   - name: Contentful
     careers_url: https://job-boards.greenhouse.io/contentful
     api: https://boards-api.greenhouse.io/v1/boards/contentful/jobs
@@ -364,12 +338,12 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/revolut
     api: https://boards-api.greenhouse.io/v1/boards/revolut/jobs
     notes: London / Berlin. Fintech unicorn.
-    enabled: false
+    enabled: true
   - name: Wise
     careers_url: https://job-boards.greenhouse.io/wise
     api: https://boards-api.greenhouse.io/v1/boards/wise/jobs
     notes: London / Brussels. Money transfer. Remote-friendly.
-    enabled: false
+    enabled: true
   - name: Brex
     careers_url: https://job-boards.greenhouse.io/brex
     api: https://boards-api.greenhouse.io/v1/boards/brex/jobs
@@ -384,7 +358,7 @@ tracked_companies:
     careers_url: https://job-boards.greenhouse.io/kraken
     api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
     notes: Crypto exchange. Remote-friendly, strong frontend org. Current employer.
-    enabled: false
+    enabled: true
   - name: Coinbase
     careers_url: https://job-boards.greenhouse.io/coinbase
     api: https://boards-api.greenhouse.io/v1/boards/coinbase/jobs
@@ -708,7 +682,7 @@ tracked_companies:
   - name: Hims & hers
     careers_url: https://jobs.ashbyhq.com/hims-andhers
     notes: Telehealth and wellness. From Applications.csv.
-    enabled: false
+    enabled: true
   - name: Huddle01
     careers_url: https://jobs.ashbyhq.com/huddle01
     notes: Video for web3. From Applications.csv.

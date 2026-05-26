@@ -1,0 +1,522 @@
+Count	Location
+126	San Francisco
+111	San Francisco, CA
+109	New York, NY (HQ)
+95	Boston, MA
+82	Berlin
+79	Remote
+67	San Francisco, CA | New York City, NY
+57	San Francisco, CA | New York City, NY | Seattle, WA
+52	London
+52	Singapore
+47	San Francisco, California, United States
+42	United States
+38	Bengaluru
+37	USA | Remote
+37	London, UK
+35	Dublin, IE
+34	London, England, United Kingdom
+32	Manila, Manila, Philippines
+31	Warszawa, Masovian Voivodeship, Poland
+30	New York, New York, United States
+29	Toronto, Ontario, Canada
+29	Headquarter
+29	United Kingdom
+28	United States & Canada
+28	Dublin
+27	Remote - United States
+26	Berlin, Berlin, Germany
+25	Seattle, Washington, United States
+25	New York, NY, United States
+25	Derby, England, United Kingdom
+24	Remote - US
+23	EMEA
+22	Brazil, Sao Paulo
+22	New York
+20	Australia
+20	Mexico, Mexico City
+19	New York City
+18	San Francisco, CA | Seattle, WA
+18	NAMER
+17	Barleben, Saxony-Anhalt, Germany; Magdeburg, Saxony-Anhalt, Germany
+17	Mexico City
+16	Hybrid - San Francisco, New York City, Austin
+16	Hybrid - San Francisco
+15	Goodyear, AZ, United States
+15	Toronto
+14	USA
+14	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo
+14	Hybrid - San Francisco, New York City
+14	North America
+14	Mexico
+14	UK
+13	Vancouver, British Columbia, Canada
+13	Verden, Niedersachsen, Germany
+13	Sydney, Australia
+12	Denver, Colorado, United States
+12	USA, Palo Alto
+12	Aurora, IL, United States
+12	Canada
+12	Mississauga, Ontario, Canada
+12	Germany
+12	Spain
+11	Oakland, CA (or remote within US timezones)
+11	London, UK (Hybrid)
+11	India
+11	Dublin, Dublin, Ireland
+11	Amsterdam, North Holland, Netherlands
+11	Chicago
+11	N/A
+10	USA, Miami
+10	São Paulo, São Paulo, Brazil
+10	Hybrid - London
+10	Tokyo, Japan
+10	Paris
+10	Washington, DC
+9	Phoenix, AZ, United States
+9	Brazil
+9	AMER
+9	Denver, CO
+9	Sydney, New South Wales, Australia
+9	Calgary, Alberta, Canada
+9	Belgrade
+9	San Francisco, CA | New York City, NY | Washington, DC
+8	remote
+8	Berlin; London; Paris
+8	Colombia, Bogota
+8	New York City, NY; San Francisco, CA
+8	China-Shanghai
+8	France
+7	San Francisco Bay Area or Remote
+7	Newark, NJ, United States
+7	Remote-Friendly (Travel-Required) | San Francisco, CA | Seattle, WA | New York City, NY
+7	Remote-Friendly, United States
+7	United States Remote
+7	San Francisco, US (Hybrid)
+7	Seattle
+7	Dublin, Ireland
+7	New York City, NY
+7	Japan
+7	Americas
+7	Milan
+7	UAE 
+6	Toronto, Canada
+6	Salt Lake City, Utah, United States
+6	APAC
+6	Madrid
+6	Barcelona
+6	US
+6	NYC-Privy
+6	London, UK; Ontario, CAN; Remote-Friendly, United States; San Francisco, CA
+6	Zürich, CH
+6	India-Karnataka
+6	England-London
+5	US-Remote
+5	Remote-Friendly (Travel-Required) | San Francisco, CA | New York City, NY
+5	Canada Remote
+5	North to South America
+5	Irving, TX, United States
+5	Europe
+5	Sydney, AU
+5	Tokyo
+5	Magdeburg, Saxony-Anhalt, Germany
+5	Paris, Paris, France
+5	Seattle, WA
+5	New York, NY
+5	San Francisco, CA | New York City, NY | Seattle, WA; Washington, DC
+4	US/Remote
+4	Canada, Toronto
+4	US / Canada
+4	Ireland
+4	Bellevue, WA
+4	Lisses, Essonne, France
+4	Perth, Western Australia, Australia
+4	Sydney
+4	Bangalore
+4	LOCATION
+4	Mexico City, Mexico
+4	Bangalore, India
+4	Seoul, South Korea
+4	New York City, NY; San Francisco, CA; Seattle, WA
+4	Sweden
+4	New York, New York
+4	Romania
+3	Americas / Remote / Full-time
+3	Remote (EMEA)
+3	Remote (US)
+3	Remote - USA
+3	San Francisco, US (Remote)
+3	USA, Durham; USA, Miami; USA, Palo Alto; USA, Washington DC
+3	Boulder, Colorado, United States; Chicago, Illinois, United States; New York, NY, United States
+3	Remote-Friendly (Travel Required) | San Francisco, CA
+3	Remote-Friendly (Travel-Required) | San Francisco, CA | Washington, DC
+3	Remote - New Jersey
+3	Remote - United Kingdom, Germany
+3	Remote - Australia
+3	APAC - Australia
+3	Hong Kong
+3	London, London, United Kingdom
+3	Argentina, Buenos Aires
+3	Bleiswijk, South Holland, Netherlands
+3	København, Capital RegionDenmark, Denmark
+3	Edmonton, Alberta, Canada
+3	Brisbane, Queensland, Australia
+3	SF, NYC
+3	NYC
+3	IN-Bengaluru
+3	San Francisco or New York
+3	Luxembourg
+3	Dublin 
+3	US-NYC
+3	SF
+3	Remote, US
+3	Dublin, IE; London, UK
+3	New York City, NY; Washington, DC
+3	India-Bangalore
+3	Remote - New York
+3	Netherlands
+3	Washington, D.C.
+3	Poland
+3	Belgium
+3	Israel
+2	Sao Paulo, Brazil
+2	Remote - Germany
+2	New York City, New York, United States
+2	USA, Durham; USA, Miami; USA, Palo Alto
+2	Brazil, Sao Paulo; USA, Durham; USA, Miami; USA, Palo Alto; USA, Washington DC
+2	Brazil, Belo Horizonte; Brazil, Sao Paulo
+2	Aurora, IL, United States; Goodyear, AZ, United States
+2	Goodyear, Arizona, United States
+2	Lake Zurich, Illinois, United States
+2	Remote - United States - New York
+2	SF, Seattle, New York, Remote in the US
+2	Boston, MA; Remote-Friendly (Travel-Required) | San Francisco, CA | Seattle, WA | New York City, NY; Washington, DC
+2	US - Remote
+2	UK - Remote
+2	Remote - Georgia
+2	Spain Remote
+2	Argentina Remote
+2	Canada - remote
+2	Remote - California
+2	Austin, US (Remote)
+2	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo; USA, Durham; USA, Miami; USA, Palo Alto; USA, Washington DC
+2	Brazil, Belo Horizonte; Brazil, Campinas; Brazil, Rio de Janeiro; Brazil, Sao Paulo; Canada, Toronto; USA, Durham; USA, Miami; USA, Palo Alto; USA, Washington DC
+2	Hybrid - London, Berlin
+2	Bengaluru, India (Hybrid)
+2	Austin, TX
+2	Munich, DE
+2	Palo Alto, CA
+2	Milan, IT
+2	Hybrid - Bangalore; Hybrid - Mumbai
+2	Hybrid - Bangalore
+2	Zurich
+2	Berlin; London
+2	Philippines
+2	Barleben, Saxony-Anhalt, Germany
+2	Boulder, Colorado, United States; New York, NY, United States
+2	Karawatha, Queensland, Australia
+2	Hannover, Lower Saxony, Germany
+2	San Francisco, CA; Seattle, WA
+2	Remote in United States
+2	Seattle, WA OR New York, NY OR Remote North America
+2	San Francisco, New York City, Seattle
+2	Dublin OR London
+2	San Francisco, Seattle, New York City
+2	IN - Bengaluru
+2	Bengaluru, India
+2	Remote in the US
+2	Remote in the US, Chicago, Atlanta
+2	Hybrid - Netherlands - Amsterdam
+2	Munich, Germany
+2	New York City, NY; San Francisco, CA; Seattle, WA; Washington, DC
+2	New York City, NY; San Francisco, CA | New York City, NY
+2	New York City, NY; San Francisco, CA | New York City, NY; Seattle, WA
+2	United Arab Emirates
+2	Italy
+2	Mumbai
+2	England
+2	Remote - Texas
+2	EU | Remote
+2	APAC | Remote
+2	Washington D.C.
+2	United Kingdom Remote
+2	Munich Office
+2	Chile
+2	Ashburn 
+2	China
+1	Remote - NA, APAC, EMEA
+1	EMEA - Remote
+1	Vancouver, BC, Canada
+1	Los Angeles, CA; Portland, OR; Remote - West; San Diego, CA; San Francisco, CA; Seattle, WA
+1	Remote - US West
+1	Remote - US Central
+1	Oakland, California, United States
+1	Boston, Massachusetts, United States 
+1	Miami, Florida, United States 
+1	Hoboken, New Jersey, United States 
+1	Baltimore, Maryland, United States
+1	Canada, Toronto; USA, Miami; USA, Palo Alto
+1	Brazil, Sao Paulo; Canada, Toronto; USA, Miami; USA, Palo Alto
+1	Argentina, Buenos Aires; Brazil, Campinas; Brazil, Sao Paulo; Canada, Toronto
+1	New York, New York, United States; San Francisco, California, United States; Seattle, Washington, United States
+1	Salt Lake City, UT, United States
+1	Newark, NJ, United States; Phoenix, AZ, United States
+1	Brooklyn, New York, United States
+1	Irving, TX, United States; Newark, NJ, United States; Toronto, Ontario, Canada
+1	Chicago, Illinois, United States; Irving, TX, United States; New York, NY, United States; Newark, NJ, United States; Phoenix, AZ, United States
+1	Onsite - United States - New York - NYC
+1	New York, San Francisco, Seattle, or Remote (US/Canada)
+1	Toronto, CAN-Remote
+1	US-Remote, Chicago
+1	US Remote
+1	US, Canada
+1	US-SEA, US-SF, US-NYC, Canada-OPEN
+1	SFO, US Remote
+1	Toronto, Remote in Canada
+1	NYC-Privy, US-Remote 
+1	Toronto, Canada 
+1	Canada, US-Remote, Chicago, Atlanta
+1	Remote-Friendly (Travel Required) | San Francisco, CA; San Francisco, CA | New York City, NY
+1	Remote-Friendly (Travel-Required) | San Francisco, CA | Seattle, WA
+1	New York City, NY; Remote-Friendly (Travel-Required) | San Francisco, CA | Washington, DC; San Francisco, CA | New York City, NY
+1	Remote - Washington
+1	Remote (Buenos Aires, Argentina)
+1	Anywhere
+1	Seattle, US (Remote)
+1	Atlanta, Georgia, United States 
+1	Goodyear, AZ, United States; Phoenix, AZ, United States
+1	Tampa, Florida, United States 
+1	Boston, Massachusetts, United States
+1	Denver, US (Remote)
+1	Orlando, Florida, United States 
+1	Atlanta, US (Remote)
+1	Boston, US (Remote)
+1	Irving, TX, United States; Newark, NJ, United States; Phoenix, AZ, United States
+1	New York City, US (Remote)
+1	Philadelphia, Pennsylvania, United States
+1	United States / Remote / Full-time
+1	Raleigh, North Carolina, United States
+1	Charlotte, North Carolina, United States
+1	Atlanta, Georgia, United States
+1	Los Angeles, California, United States
+1	Austin, Texas, United States
+1	Hybrid - Berlin
+1	Hybrid - New York City
+1	San Francisco and/or US Remote
+1	Remote - EMEA, Remote - NA
+1	New York City, US (Hybrid)
+1	Mumbai, India (Hybrid)
+1	Mexico City, Mexico (Remote)
+1	New York City, US (Remote) 
+1	Paris, FR
+1	Singapore; Sydney, Australia
+1	Remote - Poland
+1	New York, NY; San Francisco, CA
+1	Arlington, VA; Atlanta, GA; Austin, TX; Boston, MA; Charlotte, NC; Chicago, IL; Dallas, TX; Hartford, CT; Houston, TX; Indianapolis, Indiana; Kansas City, Missouri; Minneapolis, Minnesota; Nashville, TN; New Haven, CT; New York, NY; Philadelphia, PA; Raleigh, NC; Remote - East; St Louis, Missouri
+1	Amsterdam, The Netherlands
+1	Hybrid (UK)
+1	Hybrid - San Francisco Bay Area
+1	APAC - Australia; Singapore
+1	Remote- New York City
+1	Zurich 
+1	Bangkok
+1	Dubai
+1	New York, NY, USA
+1	Raleigh, North Carolina, United States 
+1	Sydney, New Wales, Australia
+1	Washington, District of Columbia, United States
+1	Amsterdam
+1	Berlin; Headquarter; London; Paris
+1	added
+1	Canada, Toronto; USA, Durham; USA, Miami; USA, Palo Alto; USA, Washington DC
+1	Argentina, Buenos Aires; Brazil, Sao Paulo; Mexico, Mexico City
+1	Boulder, Colorado, United States; Chicago, Illinois, United States; Dallas, TX, United States; Phoenix, AZ, United States
+1	Aurora, IL, United States; Chicago, Illinois, United States; New York, NY, United States
+1	Gelsenkirchen, North Rhine-Westphalia, Germany
+1	Moss, Østfold, Norway; Oslo, Oslo, Norway
+1	Gennevilliers, Hauts-de-Seine, France
+1	Gent, East Flanders, Belgium
+1	Schiller Park, IL, United States
+1	Abbotsford, British Columbia, Canada
+1	Melbourne, Victoria, Australia
+1	Aurora, IL, United States; New York, NY, United States
+1	Aurora, Colorado, United States
+1	Fairfield, NJ, United States
+1	Germany 
+1	San Francisco, CA; Chicago, IL & New York, NY
+1	Paris, Framce
+1	San francisco, NYC
+1	South San Francisco, CA; New York, NY; Seattle, WA; Chicago, IL; Atlanta, GA; Washington DC
+1	SF, NYC, SEA, CHI
+1	US-Chicago, US-SF-HQ
+1	San Francisco or New York City 
+1	Seattle, San Francisco, New York 
+1	San Francisco, Seattle, Remote in US
+1	San Francisco, CA, Seattle, WA
+1	San Francisco, Seattle
+1	San Francisco 
+1	SFO
+1	Chicago, ATL, US-Remote
+1	San Francisco, Seattle, New York, Chicago, Remote in the US
+1	San Francisco, New York, Seattle
+1	Chicago, IL , Remote
+1	US-Remote (35 miles+ outside an office)
+1	San Fransisco, New York, Seattle, Chicago, Remote US
+1	San Francisco, Seattle 
+1	DC, SF, NYC
+1	Chicago, Toronto, Atlanta
+1	Toronto, Remote-Canada 
+1	Chicago, US-Remote, Toronto 
+1	San Francisco, Seattle, New York
+1	Chicago, IL; Atlanta, GA
+1	 Luxembourg
+1	London 
+1	Dubai , UAE
+1	SF, SEA, NYC
+1	CA-Toronto
+1	SEA
+1	Sao Paulo 
+1	Bucharest
+1	US-SF
+1	Atlanta, GA
+1	US-San Francisco
+1	Brussels, Belgium OR London, United Kingdom
+1	South San Francisco
+1	Chicago, San Francisco, Seattle, New York City
+1	Seattle, Chicago, San Francisco, New York
+1	New York Privy HQ
+1	South San Francisco HQ
+1	US-NYC; US-San Francisco; US-Seattle; US-Remote; US-Chicago
+1	Dublin or London
+1	NYC, SF, SEA
+1	San Francisco, New York, Seattle, Chicago, Remote in the US
+1	Atlanta; New York
+1	Tokyo , Japan
+1	SF or NYC
+1	India, Bangalore 
+1	US Remote; Chicago, IL; Remote Canada; Toronto, Canada
+1	Chicago, Seattle, US Remote
+1	Chicago, Atlanta, San Francisco, Seattle, New York
+1	Atlanta, Chicago
+1	Mexico City 
+1	MX- Mexico City
+1	Remote-US/CA
+1	US-Remote; US-Chicago; US-Atlanta; Canada-Toronto; Canada-Remote
+1	US-San Francisco; US-New York City; US-Seattle; US-Remote; US-Chicago
+1	USA 
+1	Chicago or Atlanta
+1	Berlin, Munich 
+1	San Francisco, CA; New York, NY; Chicago, IL; Seattle, WA; Atlanta, GA 
+1	Chicago, IL; Atlanta, GA; US-Remote; San Francisco, CA; New York; NY 
+1	San Francisco, New York City, Seattle, Chicago
+1	Atlanta, GA; Chicago, IL 
+1	Seattle, WA; San Francisco, CA
+1	US remote
+1	US-Remote, US-SEA, US-SF, US-NYC, Toronto
+1	San Francisco, Seattle, New York, Chicago
+1	SF, SEA, NYC, US - Remote
+1	Toronto, Remote- Canada
+1	SF, SEA, NY, Remote-US
+1	SF, NY, SEA, Remote-US
+1	NYC, Chicago, Seattle, San Francisco
+1	Seattle, San Francisco, New York
+1	San Francisco, New York, Seattle, Chicago, Remote, Toronto
+1	SF, Seattle, NYC
+1	SF, NYC, Seattle, Remote in the US
+1	Remote US, Canada
+1	New York, Dublin, London
+1	US/Canada
+1	U.S. 
+1	US-Chicago, US-Remote
+1	San Francisco, Seattle, NYC
+1	US-Remote, US-National, Toronto
+1	Chicago, Atlanta, US-Remote
+1	SF, SEA, CHI, NYC, ATL
+1	London/Amsterdam 
+1	SEA, SF, NYC, CHI
+1	US-Remote; US-Chicago; US-Atlanta; CA-Toronto; CA-Remote
+1	US-Chicago, US-Atlanta, US-Remote; Canada-Toronto; Canada-Remote
+1	Chicago, US-Remote, Toronto
+1	US-Chicago; US-Atlanta; US-Remote; Canada-Toronto; Canada-Remote
+1	Chicago, SEA, SF, NYC, US-Remote
+1	CHI, SF, NYC
+1	Singapore, Tokyo, Sydney, Bangkok
+1	Singapore, Sydney
+1	San Francisco, CA; New York, NY
+1	New York City or San Francisco
+1	San Francisco, New York City, Dublin
+1	SF, New York, Seattle, Dublin
+1	SEA, SF
+1	San Francisco, NY, Seattle
+1	San Francisco, California 
+1	na
+1	Sweden, Dublin, Amsterdam
+1	Chicago, IL or New York City, NY OR US Remote
+1	Milan, Barcelona, Madrid, Dublin, Amsterdam
+1	Chicago, IL or New York, NY
+1	US-NY
+1	NY, SF, Remote
+1	NY, SF, Chicago
+1	NY or SF
+1	NYC, SEA
+1	US 
+1	San Francisco, Seattle, NYC, Chicago, Atlanta, US Remote
+1	San Francisco, Seattle, New York, Chicago, Atlanta, Remote
+1	SF, SEA, NYC, Remote
+1	San Francisco, Seattle, New York, Toronto 
+1	Stockholm 
+1	San Francisco, Seattle, Chicago, US-remote, New York
+1	Chicago 
+1	SF, NYC, CHI, SEA
+1	Berlin 
+1	US-Remote; US-Chicago; US-Atlanta
+1	Ireland-Dublin, UK-London, Ireland-remote, UK-remote
+1	CA-Remote-British Columbia
+1	Chicago, IL
+1	Dubai, UAE
+1	Toronto, Chicago
+1	Remote US
+1	Remote — North America (Aligned with U.S. Time Zones)
+1	Hybrid - Germany - Berlin
+1	Onsite - United States - Colorado - Denver
+1	Boston, MA; New York City, NY; San Francisco, CA | New York City, NY; Seattle, WA; Washington, DC
+1	Boston, MA; New York City, NY; San Francisco, CA; Seattle, WA
+1	Boston, MA; New York City, NY; San Francisco, CA; Seattle, WA; Washington, DC
+1	New York City, NY | Seattle, WA; San Francisco, CA
+1	London, UK; New York City, NY
+1	Boston, MA; New York City, NY; Washington, DC
+1	Paris, France
+1	Boston, MA; New York City, NY | Seattle, WA; San Francisco, CA | New York City, NY; Washington, DC
+1	San Francisco, CA | New York City, NY; Seattle, WA
+1	Remote-Friendly, United States; San Francisco, CA | New York City, NY
+1	London, UK; San Francisco, CA | New York City, NY
+1	New York City, NY | Seattle, WA; San Francisco, CA | New York City, NY | Seattle, WA; Washington, DC
+1	Brussels, Belgium; Dublin, IE; London, UK
+1	Boston, MA; San Francisco, CA | New York City, NY | Seattle, WA; Washington, DC
+1	New York City, NY; New York City, NY | Seattle, WA; San Francisco, CA
+1	Remote-Friendly (Travel-Required) | San Francisco, CA | Washington, DC; San Francisco, CA | New York City, NY
+1	San Francisco, CA, New York City, NY, Seattle, WA
+1	Oakland, CA (or remote)
+1	Remote - LATAM
+1	India-Maharashtra
+1	Remote - Colorado
+1	Remote - North Carolina
+1	France-Paris
+1	Remote - Massachusetts
+1	Switzerland
+1	Remote (Canada)
+1	Toronto, ON
+1	Remote (USA)
+1	New York (Preferred) or Remote
+1	HQ
+1	Ireland Remote
+1	Netherlands Remote
+1	Bulgaria
+1	NYC / SF / London
+1	San Francisco Office
+1	Czech Republic
+1	Norway
+1	Denmark
+1	Austria
+1	LATAM
+1	Tunisia

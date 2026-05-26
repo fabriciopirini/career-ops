@@ -1,0 +1,111 @@
+=== Full Dataset Stats ===
+Total jobs: 3020
+
+=== Seniority Distribution ===
+  Manager: 746
+  Senior: 508
+  Lead: 223
+  Staff: 192
+  Director: 65
+  Intern: 50
+  Head: 48
+  Principal: 20
+  Junior: 8
+  VP: 2
+
+=== Tech Stack ===
+  TypeScript: 125
+  Go: 31
+  Rust: 8
+  React: 4
+  JavaScript: 3
+  Kotlin: 2
+  Next.js: 1
+  Python: 1
+
+=== Role Types ===
+  Product (PM): 267
+  Sales: 149
+  Data: 137
+  Marketing: 126
+  Design: 88
+  Backend: 69
+  Support: 59
+  Fullstack: 34
+  Frontend: 20
+  Mobile: 11
+  DevOps/SRE: 10
+
+=== Top 20 Locations ===
+  San Francisco: 126
+  San Francisco, CA: 111
+  New York, NY (HQ): 109
+  Boston, MA: 95
+  Berlin: 82
+  Remote: 79
+  San Francisco, CA | New York City, NY: 67
+  San Francisco, CA | New York City, NY | Seattle, WA: 57
+  London: 52
+  Singapore: 52
+  San Francisco, California, United States: 47
+  United States: 42
+  Bengaluru: 38
+  USA | Remote: 37
+  London, UK: 37
+  Dublin, IE: 35
+  London, England, United Kingdom: 34
+  Manila, Manila, Philippines: 32
+  Warszawa, Masovian Voivodeship, Poland: 31
+  New York, New York, United States: 30
+
+=== All Companies (by job count) ===
+  Stripe: 459
+  HelloFresh: 370
+  Anthropic: 367
+  Klaviyo: 172
+  ElevenLabs: 148
+  Brex: 125
+  Ramp: 121
+  Nubank: 111
+  Deel: 108
+  Kong: 82
+  Vercel: 76
+  Contentful: 68
+  Baseten: 61
+  GetYourGuide: 60
+  Deepgram: 59
+  Trade Republic: 58
+  Perplexity: 55
+  Amplitude: 47
+  LaunchDarkly: 47
+  Supabase: 43
+  Mixpanel: 34
+  N26: 34
+  WorkOS: 30
+  Sequence: 30
+  Angi: 24
+  Assured: 24
+  Zapier: 24
+  Mural: 20
+  Linear: 18
+  PostHog: 17
+  Wynd Labs: 16
+  Infisical: 15
+  Imprint: 15
+  Elicit: 13
+  Collective: 12
+  PlanetScale: 11
+  Aleph: 7
+  Liveflow: 7
+  Statsig: 6
+  LightDash: 5
+  Inngest: 4
+  Resend: 4
+  Wagmo: 3
+  Rewind: 2
+  AngleHealth: 2
+  remberg: 2
+  Buffer: 1
+  Pessoa Engenheira de Software Mobile - exclusiva para Pessoas com Deficiência: 1
+  0x: 1
+  Keep: 1

@@ -4,7 +4,7 @@
 candidate:
     full_name: "Fabricio Tramontano Pirini"
     email: "fabricio@fabriciopirini.com"
-    phone: "+55-XXX-XXX-XXXX"
+    phone: "+55-16996341688"
     location: "Brazil (UTC -3)"
     linkedin: "linkedin.com/in/fabriciopirini"
     portfolio_url: "https://fabriciopirini.com"
@@ -68,9 +68,9 @@ narrative:
     #   password: ""
 
 compensation:
-    target_range: "$80K-120K" # Your target total comp
+    target_range: "$120K-150K" # Your target total comp
     currency: "USD"
-    minimum: "$70K" # Walk-away number
+    minimum: "$100K" # Walk-away number
     location_flexibility: "Remote-first, open to occasional travel"
 
 location:
