@@ -243,6 +243,11 @@ These rules apply to ALL generated text that ends up in candidate-facing documen
 **Every piece of candidate-facing text** (resume bullets, summary, cover letter, form answers, LinkedIn messages, follow-ups) MUST go through this pipeline:
 
 1. **Run the humanizer skill:** Invoke `/skill:humanizer` on every text block before it goes into HTML or form fields.
-2. **Strip ALL em dashes:** Replace every `—` (U+2014) with a regular hyphen `-`. En dashes `–` (U+2013) also get replaced with `-`. There is no exception. Em dashes are a strong AI-writing signal and ATS-hostile.
+2. **Strip ALL em/en dashes:** Rewrite sentences to avoid dash constructions entirely. Em dashes (`—`) and en dashes (`–`) are strong AI-writing signals. Don't mechanically replace with `-` — restructure the sentence so the dash isn't needed.
 
-**No em dashes ever in generated output.** Period.
+   Examples:
+   - "Cut runtime from 12 min to under a minute — tripled coverage" -> "Cut runtime from 12 min to under a minute. Coverage tripled."
+   - "Built 5 storefronts — from requirements to deployment" -> "Built 5 storefronts end-to-end: from requirements to deployment."
+   - "The bottleneck shifts — the question becomes what to build" -> "As AI lowers the cost of implementation, the bottleneck shifts to deciding what to build."
+
+**No em or en dashes in generated output.** Rewrite the sentence.

@@ -108,16 +108,25 @@ Invoke `/skill:humanizer` on:
 
 The humanizer will catch: AI vocabulary (leveraging, pivotal, foster, etc.), forced "rule of three", negative parallelisms (", not just about X, it's about Y"), vague attributions, promotional language, filler phrases.
 
-### Step 6 — Strip Em Dashes + Normalize Typography (MANDATORY)
+### Step 6 — Rewrite Em/En Dashes + Normalize Typography (MANDATORY)
 
-**Rule: ZERO em dashes in any generated output.** Period.
+**Rule: ZERO em or en dashes.** Rewrite sentences, don't just replace characters.
 
-After humanizing, strip em dashes from ALL text before writing to HTML/PDF:
+After humanizing, check ALL text for em dashes (`—`) and en dashes (`–`). For each one found, **rewrite the sentence** to avoid the dash construction:
+
+```
+// Wrong: mechanically replace character
+"Reduced runtime 12min to 1min — tripled coverage" -> "Reduced runtime 12min to 1min - tripled coverage"
+
+// Right: rewrite the sentence
+"Reduced runtime 12min to 1min — tripled coverage" -> "Reduced runtime from 12 min to under a minute. Coverage tripled."
+```
+
+Then normalize typography for remaining characters:
 
 ```javascript
 function normalizeTypography(text) {
   return text
-    .replace(/[\u2014\u2013]/g, '-')   // em + en dash → hyphen
     .replace(/[\u201C\u201D]/g, '"')    // smart quotes → straight
     .replace(/[\u2018\u2019]/g, "'")    // smart single quotes → straight
     .replace(/\u2026/g, '...')           // ellipsis → three dots
@@ -126,7 +135,7 @@ function normalizeTypography(text) {
 }
 ```
 
-**Check:** After writing HTML, grep for `\u2014` or `—` in the output file. If any found, fix and re-render.
+**Check:** After writing HTML, grep for `\u2014` or `—` in the output file. If any found, rewrite those sentences and re-render.
 
 ### Step 7 — Generate Cover Letter PDF
 

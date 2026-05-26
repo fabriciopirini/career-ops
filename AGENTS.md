@@ -108,7 +108,7 @@ Paste JD URL or text.
 ## Rules (MANDATORY)
 
 1. **Humanizer:** Every candidate-facing text block -> run `/skill:humanizer`
-2. **Zero em dashes:** Replace ALL \u2014 and \u2013 with `-`. No exceptions.
+2. **Zero em/en dashes:** Rewrite sentences to avoid dash constructions entirely. Don't mechanically replace character -- restructure the sentence. No exceptions.
 3. **No score gate for form answers:** Always generate H block pre-drafts + application-form answers.
 4. **NEVER submit:** Generate everything, stop before click.
 5. **Override approach:** Create override JSON for resume customizations, never edit portfolio files directly.
