@@ -212,7 +212,7 @@ Mode routing is handled by the `career-ops` skill (`.agents/skills/career-ops/SK
 This repo has been forked from `santifer/career-ops` and customized for **Fabricio Pirini**. The full application pipeline integrates the portfolio at `~/dev/portfolio` for resume generation.
 
 ### 1. Evaluate (auto)
-Paste JD or URL → `oferta` mode triggers. Produces A-F + G report in `reports/`.
+Paste JD or URL -> evaluation mode triggers. Produces A-F + G report in `reports/`.
 
 ### 2. Prepare application package
 
@@ -369,7 +369,7 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 
 1. **NEVER edit applications.md to ADD new entries** -- Write TSV in `batch/tracker-additions/` and `merge-tracker.mjs` handles the merge.
 2. **YES you can edit applications.md to UPDATE status/notes of existing entries.**
-3. All reports MUST include `**URL:**` in the header (between Score and PDF). Include `**Legitimacy:** {tier}` (see Block G in `modes/oferta.md`).
+3. All reports MUST include `**URL:**` in the header (between Score and PDF). Include `**Legitimacy:** {tier}` (see Block G in the evaluation mode).
 4. All statuses MUST be canonical (see `templates/states.yml`).
 5. Health check via `node normalize-statuses.mjs` + `node dedup-tracker.mjs` + `node merge-tracker.mjs`
 6. Normalize statuses: `node normalize-statuses.mjs`
