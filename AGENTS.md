@@ -56,13 +56,12 @@ AI-powered, CLI-agnostic job search automation: pipeline tracking, offer evaluat
 | `portals.yml` | Query and company config |
 | `templates/cv-template.html` | HTML template for CVs |
 | `templates/cv-template.tex` | LaTeX/Overleaf template for CVs |
-| `generate-pdf.mjs` | Playwright: HTML to PDF |
-| `generate-latex.mjs` | LaTeX CV validator + pdflatex compiler |
+| `generate-pdf-from-html.mjs` | Playwright: HTML to PDF |
+| `normalize-typography.mjs` | ATS-safe typography normalization |
 | `article-digest.md` | Compact proof points from portfolio (optional) |
 | `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
 | `interview-prep/{company}-{role}.md` | Company-specific interview intel reports |
-| `analyze-patterns.mjs` | Pattern analysis script (JSON output) |
-| `followup-cadence.mjs` | Follow-up cadence calculator (JSON output) |
+| `application-form.mjs` | Extracts form fields from JD URL + generates draft answers via Playwright |
 | `data/follow-ups.md` | Follow-up history tracker |
 | `scan.mjs` | Zero-token portal scanner — hits Greenhouse/Ashby/Lever APIs directly, zero LLM cost |
 | `check-liveness.mjs` | Job posting liveness checker |
@@ -196,27 +195,9 @@ Default modes are in `modes/` (English). Additional language-specific modes are 
 
 **When NOT to:** If the user applies to English-language roles, even at French, German, Japanese, or Turkish companies, use the default English modes — *unless* the user has explicitly requested another mode in this conversation, or `language.modes_dir` is set in `config/profile.yml` (the explicit user preference always wins over JD-language detection).
 
-### Skill Modes
+### Mode Routing
 
-| If the user... | Mode |
-|----------------|------|
-| Pastes JD or URL | auto-pipeline (evaluate + report + PDF + tracker) |
-| Asks to evaluate offer | `oferta` |
-| Asks to compare offers | `ofertas` |
-| Wants LinkedIn outreach | `contacto` |
-| Asks for company research | `deep` |
-| Preps for interview at specific company | `interview-prep` |
-| Wants to generate CV/PDF | `pdf` |
-| Evaluates a course/cert | `training` |
-| Evaluates portfolio project | `project` |
-| Asks about application status | `tracker` |
-| Fills out application form | `apply` |
-| Searches for new offers | `scan` |
-| Processes pending URLs | `pipeline` |
-| Batch processes offers | `batch` |
-| Asks about rejection patterns or wants to improve targeting | `patterns` |
-| Asks about follow-ups or application cadence | `followup` |
-| Wants to update the system | `update` |
+Mode routing is handled by the `career-ops` skill (`.agents/skills/career-ops/SKILL.md`). Invoke `/skill:career-ops {mode}` or let auto-detection route based on user input. For application package generation, invoke `/skill:application-prep` after evaluation.
 
 ### CV Source of Truth
 
@@ -273,7 +254,7 @@ I prepare form answers (3 bullets, cover letter text). You review. You submit. *
 | `.agents/skills/application-prep/SKILL.md` | Skill definition — full workflow |
 | `render-resume-html.mjs` | Imports portfolio TypeScript data via tsx, renders standalone HTML |
 | `generate-pdf-from-html.mjs` | HTML → PDF via Playwright |
-| `customize-resume.mjs` | Applies Block E customizations from evaluation report |
+| `render-resume-html.mjs` | Renders resume HTML from portfolio data with optional per-job override |
 | `normalize-typography.mjs` | ATS-safe typography normalization |
 | `output/` | Generated PDFs and HTML (gitignored) |
 
@@ -390,7 +371,7 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 2. **YES you can edit applications.md to UPDATE status/notes of existing entries.**
 3. All reports MUST include `**URL:**` in the header (between Score and PDF). Include `**Legitimacy:** {tier}` (see Block G in `modes/oferta.md`).
 4. All statuses MUST be canonical (see `templates/states.yml`).
-5. Health check: `node verify-pipeline.mjs`
+5. Health check via `node normalize-statuses.mjs` + `node dedup-tracker.mjs` + `node merge-tracker.mjs`
 6. Normalize statuses: `node normalize-statuses.mjs`
 7. Dedup: `node dedup-tracker.mjs`
 

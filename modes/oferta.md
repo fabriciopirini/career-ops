@@ -190,7 +190,18 @@ Save full evaluation in `reports/{###}-{company-slug}-{YYYY-MM-DD}.md`.
 (full content of block G)
 
 ## H) Draft Application Answers
-(only if score >= 4.5 — draft answers for the application form)
+
+Draft answers for the application form. These will be refined when the user runs `/skill:application-prep` which extracts the actual form fields via Playwright.
+
+**Questions to pre-draft (for every application):**
+1. Why this company / Why are you interested?
+2. How does your experience match this role?
+3. What's a recent achievement you're proud of?
+4. Salary expectations
+5. Work authorization / visa status
+6. Start date / availability
+
+Generate pre-draft answers here. They will be supplemented by actual form field extraction in the application-prep workflow.
 
 ---
 

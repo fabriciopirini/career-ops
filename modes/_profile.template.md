@@ -21,27 +21,23 @@
 
 | Archetype | Thematic axes | What they buy |
 |-----------|---------------|---------------|
-| **AI Platform / LLMOps Engineer** | Evaluation, observability, reliability, pipelines | Someone who puts AI in production with metrics |
-| **Agentic Workflows / Automation** | HITL, tooling, orchestration, multi-agent | Someone who builds reliable agent systems |
-| **Technical AI Product Manager** | GenAI/Agents, PRDs, discovery, delivery | Someone who translates business to AI product |
-| **AI Solutions Architect** | Hyperautomation, enterprise, integrations | Someone who designs end-to-end AI architectures |
-| **AI Forward Deployed Engineer** | Client-facing, fast delivery, prototyping | Someone who delivers AI solutions to clients fast |
-| **AI Transformation Lead** | Change management, adoption, org enablement | Someone who leads AI transformation in an org |
+| **Senior Frontend Engineer** | Component architecture, React/TS, a11y, testing | Someone who ships polished UIs and fixes the pipeline too |
+| **Design System Engineer** | Tokens, theming, multi-brand, Figma-to-code | Someone who makes teams consistent without blocking them |
+| **Growth Engineer** | A/B testing, metrics, experiment platform, localization | Someone who runs experiments AND owns the infra |
+| **Full Stack Engineer** | End-to-end feature delivery, CI/CD, customer-facing | Someone who builds from spec to deploy, no handoffs |
+| **Developer Experience Engineer** | Testing infra, CI/CD, tooling, component libraries | Someone who makes other engineers faster |
 
 ## Your Adaptive Framing
 
-<!-- Map YOUR projects to each archetype. Example:
-     | Platform / LLMOps | My monitoring dashboard project | article-digest.md |
-     | Agentic | My chatbot with HITL escalation | cv.md section 3 | -->
+<!-- Map YOUR projects and proof points to each archetype -->
 
-| If the role is... | Emphasize about you... | Proof point sources |
-|-------------------|------------------------|---------------------|
-| Platform / LLMOps | Production systems builder, observability, evals | article-digest.md + cv.md |
-| Agentic / Automation | Multi-agent orchestration, HITL, reliability | article-digest.md + cv.md |
-| Technical AI PM | Product discovery, PRDs, metrics | cv.md + article-digest.md |
-| Solutions Architect | System design, integrations, enterprise-ready | article-digest.md + cv.md |
-| Forward Deployed Engineer | Fast delivery, client-facing, prototype to prod | cv.md + article-digest.md |
-| AI Transformation Lead | Change management, team enablement, adoption | cv.md + article-digest.md |
+| If the role is... | Emphasize about you... | Key proof points |
+|-------------------|------------------------|------------------|
+| Frontend Engineer | React/TS, a11y, multi-platform, component architecture | Your design system work, a11y compliance, component library |
+| Design System Engineer | Figma-to-code, multi-brand theming, tokens | Token pipelines, multi-brand setups, component library adoption |
+| Growth Engineer | A/B experimentation, metrics-driven, PLG | Experiment programs you built, growth metrics, localization wins |
+| Full Stack Engineer | End-to-end ownership, CI/CD, customer-facing | Microservices, CI/CD pipelines, customer-facing delivery |
+| Developer Experience | Testing infra, CI/CD, component libraries | VRT infra, CI/CD setups, shared tooling you shipped |
 
 ## Your Exit Narrative
 

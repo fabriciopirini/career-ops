@@ -6,11 +6,24 @@
  * Writes a temp script, runs via tsx to import actual TypeScript, renders HTML.
  * No Next.js caching issues. No fragile regex.
  *
- * Usage: node render-resume-html.mjs <output.html> [--variant default|growth|product]
+ * Usage: node render-resume-html.mjs <output.html> [--variant default|growth|product] [--override <override.json>]
+ *
+ * Override JSON format:
+ *   {
+ *     "subtitle": "Custom title",
+ *     "summary": "Custom summary...",
+ *     "bullets": {
+ *       "crypto-exchange": {
+ *         "0": ["Custom bullet 1", "Custom bullet 2"]
+ *       }
+ *     }
+ *   }
+ *   bullets = { jobId: { periodIndex: [replacement bullets] } }
+ *   Only specified fields override. Unspecified fields use portfolio defaults.
  */
 
-import { writeFile, mkdir } from 'fs/promises';
-import { writeFileSync, unlinkSync } from 'fs';
+import { writeFile, mkdir, readFile } from 'fs/promises';
+import { writeFileSync, unlinkSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -127,17 +140,46 @@ ${sv.globe} <a href="https://fabriciopirini.com">fabriciopirini.com</a></div></d
 </div></body></html>`;
 }
 
+function mergeOverride(d, ov) {
+  if (!ov) return d;
+  const out = { ...d, jobs: (d.jobs||[]).map(j => ({ ...j, periods: j.periods.map((p, pi) => ({ ...p, bullets: [...(p.bullets||[])] })) })) };
+  if (ov.subtitle) out.subtitle = ov.subtitle;
+  if (ov.summary) out.summary = ov.summary;
+  if (ov.bullets) {
+    for (const [jid, pidMap] of Object.entries(ov.bullets)) {
+      const job = out.jobs.find(j => j.id === jid);
+      if (!job) { log('w', `Override: job '${jid}' not found in career data`); continue; }
+      for (const [piStr, bullets] of Object.entries(pidMap)) {
+        const pi = parseInt(piStr, 10);
+        if (pi >= job.periods.length) { log('w', `Override: job '${jid}' has no period index ${pi}`); continue; }
+        job.periods[pi].bullets = [...bullets];
+        log('s', `Applied ${bullets.length} override bullets to ${jid}[${pi}]`);
+      }
+    }
+  }
+  return out;
+}
+
 async function main() {
   const args = process.argv.slice(2);
-  let output = null, variant = 'default';
+  let output = null, variant = 'default', overridePath = null;
   for (const a of args) {
     if (a.startsWith('--variant=')) { variant = a.split('=')[1]; continue; }
+    if (a.startsWith('--override=')) { overridePath = resolve(__dirname, a.split('=')[1]); continue; }
     if (!a.startsWith('--') && !output) { output = resolve(__dirname, a); }
   }
-  if (!output) { console.error('Usage: node render-resume-html.mjs <output.html> [--variant=default|growth|product]'); process.exit(1); }
+  if (!output) { console.error('Usage: node render-resume-html.mjs <output.html> [--variant=default|growth|product] [--override=<override.json>]'); process.exit(1); }
 
   log('i', `Importing variant '${variant}'...`);
-  const d = importData(variant);
+  let d = importData(variant);
+
+  if (overridePath) {
+    if (!existsSync(overridePath)) { log('e', `Override file not found: ${overridePath}`); process.exit(1); }
+    const raw = await readFile(overridePath, 'utf-8');
+    const ov = JSON.parse(raw);
+    log('i', `Applying override: ${overridePath}`);
+    d = mergeOverride(d, ov);
+  }
 
   log('i', `Summary: ${(d.summary||'').substring(0,80)}...`);
   log('i', `Skills: ${(d.skills||[]).length} jobs: ${(d.jobs||[]).length}`);

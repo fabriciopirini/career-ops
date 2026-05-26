@@ -1,3 +1,10 @@
+---
+name: application-prep
+description: Customize resume for target role, generate matching cover letter, humanize text, normalize typography, and produce polished PDFs
+user-invocable: true
+license: MIT
+---
+
 # Application Prep — Full Application Workflow
 
 Customizes resume to the target role, generates a matching cover letter, humanizes all text, normalizes typography, and produces polished PDFs.
@@ -25,33 +32,31 @@ Extract from report:
 - Customization plan (Block E)
 - Block H draft answers (3 bullets, why this company)
 
-### Step 2 — Customize Resume
+### Step 2 — Create Resume Override (not portfolio files)
 
-Apply changes to `~/dev/portfolio/lib/career-data.ts`:
+**DO NOT edit portfolio files.** Create an override JSON at `output/{###}-{company}-override.json`:
 
-**Subtitle** — Change to match JD role title (e.g., "Senior Software Engineer" → "Full Stack Engineer")
+```json
+{
+  "subtitle": "Senior Frontend Engineer (matching JD title)",
+  "summary": "Rewritten summary targeting this role...",
+  "bullets": {
+    "crypto-exchange": {
+      "0": ["Custom bullet 1", "Custom bullet 2"]
+    }
+  }
+}
+```
 
-**Summary** — Rewrite to emphasize the archetype's key framing:
-- Full Stack → "Full stack engineer who builds developer-facing tools and works directly with customers"
-- Growth → "Senior engineer who builds experimentation programs and ships based on data"
-- Product → "Product engineer who writes success metrics before writing code"
-
-**Job bullets** — For each company, reorder or rephrase bullets to emphasize:
-- The skills the JD asks for
-- Direct customer/enterprise communication (if JD emphasizes this)
-- Building from scratch, end-to-end ownership (if JD emphasizes bias toward action)
-
-**Skills** — Add a relevant skills row if gaps exist (e.g., "Full Stack" row for full stack roles)
-
-**Variant** — Set `ACTIVE_VARIANT` in `site-config.ts` to match the archetype:
-- `default` — Design Engineer, Full Stack, Solutions Architect
-- `growth` — Growth, Forward Deployed
-- `product` — Product Engineer, PM
+Override keys:
+- **subtitle** — Match JD role title (e.g., "Senior Software Engineer" → "Full Stack Engineer")
+- **summary** — Rewrite to emphasize the archetype's key framing
+- **bullets** — `{ jobId: { periodIndex: [replacement bullets] } }`. Only specify jobs/periods that need custom bullets. Everything else falls through to portfolio defaults.
 
 ### Step 3 — Generate Resume PDF
 
 ```bash
-node render-resume-html.mjs output/{###}-{company}-resume.html [--variant=default]
+node render-resume-html.mjs output/{###}-{company}-resume.html --variant=default --override=output/{###}-{company}-override.json
 node generate-pdf-from-html.mjs output/{###}-{company}-resume.html output/{###}-{company}-resume.pdf
 ```
 
@@ -89,42 +94,39 @@ Create a cover letter HTML that **visually matches the portfolio's resume** — 
 - No fluff, no corporate-speak
 - 1 page max
 
-### Step 5 — Humanize All Text
+### Step 5 — Humanize All Text (MANDATORY)
 
-Run ALL generated text (resume summary, bullets, cover letter) through the humanizer patterns:
+**Every single block of candidate-facing text** MUST go through the humanizer skill before being written to HTML or form fields.
 
-1. Remove em dash overuse → replace with commas or periods
-2. Remove AI vocabulary: additionally, crucial, delve, enhance, fostering, leverage, pivotal, showcase, testament, underscore, vibrant
-3. Remove negative parallelisms: "It's not just about..., it's..."
-4. Remove rule of three where forced
-5. Remove vague attributions
-6. Vary sentence structure and length
-7. Add specificity over abstraction
-8. Remove promotional language
-9. Replace filler: "in order to" → "to", "due to the fact" → "because"
+Invoke `/skill:humanizer` on:
+- Resume summary
+- Resume bullets
+- Cover letter body
+- Form answers
+- LinkedIn messages
+- Follow-up emails
 
-**Use the humanizer skill:** `/skill:humanizer` on each text block.
+The humanizer will catch: AI vocabulary (leveraging, pivotal, foster, etc.), forced "rule of three", negative parallelisms (", not just about X, it's about Y"), vague attributions, promotional language, filler phrases.
 
-### Step 6 — Normalize Typography for ATS
+### Step 6 — Strip Em Dashes + Normalize Typography (MANDATORY)
 
-Replace in ALL text before writing to HTML:
-- Em dashes (—) → en dashes (–) or hyphens (-)
-- Smart quotes ("") → straight quotes ("")
-- Ellipsis (…) → three dots (...)
-- Zero-width characters → removed
+**Rule: ZERO em dashes in any generated output.** Period.
+
+After humanizing, strip em dashes from ALL text before writing to HTML/PDF:
 
 ```javascript
 function normalizeTypography(text) {
   return text
-    .replace(/\u2014/g, '-')     // em dash → hyphen
-    .replace(/\u2013/g, '-')     // en dash → hyphen
-    .replace(/[\u201C\u201D]/g, '"')  // smart quotes → straight
-    .replace(/[\u2018\u2019]/g, "'")  // smart single quotes → straight
-    .replace(/\u2026/g, '...')   // ellipsis → three dots
+    .replace(/[\u2014\u2013]/g, '-')   // em + en dash → hyphen
+    .replace(/[\u201C\u201D]/g, '"')    // smart quotes → straight
+    .replace(/[\u2018\u2019]/g, "'")    // smart single quotes → straight
+    .replace(/\u2026/g, '...')           // ellipsis → three dots
     .replace(/[\u200B-\u200D\uFEFF]/g, '') // zero-width chars
-    .replace(/\u00A0/g, ' ');    // non-breaking space → space
+    .replace(/\u00A0/g, ' ');            // non-breaking space → space
 }
 ```
+
+**Check:** After writing HTML, grep for `\u2014` or `—` in the output file. If any found, fix and re-render.
 
 ### Step 7 — Generate Cover Letter PDF
 
@@ -132,21 +134,56 @@ function normalizeTypography(text) {
 node generate-pdf-from-html.mjs output/{###}-{company}-cover-letter.html output/{###}-{company}-cover-letter.pdf
 ```
 
-### Step 8 — Update Tracker
+### Step 8 — Extract Form Fields + Generate Application Answers
 
+Run the form extractor to open the JD URL, find the Apply page, extract questions, and prepare draft answers:
+
+```bash
+node application-form.mjs <jd-url> --report reports/{###}-{company}-{date}.md --output output/{###}-{company}-form-answers.md
+```
+
+The script outputs a JSON object with extracted form fields. The LLM then:
+1. For each extracted question, generate a tailored answer using career data + evaluation report
+2. Write humanized, em-dash-free answers into `output/{###}-{company}-form-answers.md`
+3. Present them for the user to review
+
+**If the form extraction fails** (non-standard ATS, login wall, complex multi-page form), fall back to a generic question set:
+- Cover Letter / Why are you interested?
+- Relevant Experience
+- Why this company?
+- Salary Expectations
+- Work Authorization
+- How did you hear about us?
+
+Generate thorough answers for the generic set.
+
+**Output format:**
+
+```markdown
+## [Exact form question label] [type] *
+> [Draft answer ready for copy-paste]
+```
+
+### Step 9 — Present + Update Tracker
+
+Show the user:
+1. Resume PDF path
+2. Cover letter PDF path
+3. Form answers path
+4. Ask: "Review these. Copy answers into the form. Ready when you want to submit."
+
+Then update tracker:
 ```bash
 node merge-tracker.mjs
 ```
 
 Update the existing tracker entry with:
 - PDF status: ✅ (resume), ✅ (cover letter)
-- Notes: "Application-ready: resume + cover letter customized"
+- Notes: "Application-ready: resume + cover letter + form answers"
 
-### Step 9 — Restore Portfolio Files
+### Step 10 — Done (no restore needed)
 
-```bash
-cd ~/dev/portfolio && git checkout -- lib/career-data.ts lib/site-config.ts
-```
+**No portfolio files were touched.** The override JSON at `output/{###}-{company}-override.json` contains all customizations for this application. No `git checkout` needed.
 
 ## Scripts
 
@@ -166,22 +203,18 @@ Located in `career-ops/`. Simple Playwright-based HTML → PDF generator.
 node generate-pdf-from-html.mjs input.html output.pdf [--format=letter|a4]
 ```
 
-### customize-resume.mjs
-
-Located in `career-ops/`. Applies customization from evaluation report to portfolio data.
-
-```bash
-node customize-resume.mjs reports/{###}-{company}.md output/{name}.pdf
-```
+_(customize-resume.mjs is obsolete — use the override JSON approach in Step 2 instead.)_
 
 ## Output Files
 
 All go in `career-ops/output/`:
 
+- `{###}-{company}-override.json` — Resume customizations (optional, per-application)
 - `{###}-{company}-resume.html` — Standalone resume HTML
 - `{###}-{company}-resume.pdf` — Resume PDF
 - `{###}-{company}-cover-letter.html` — Cover letter HTML (matches resume design)
 - `{###}-{company}-cover-letter.pdf` — Cover letter PDF
+- `{###}-{company}-form-answers.md` — Application form draft answers
 
 ## The Rule
 

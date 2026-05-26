@@ -77,14 +77,15 @@ Classify every offer into one of these types (or hybrid of 2):
 
 | Archetype | Key signals in JD |
 |-----------|-------------------|
-| AI Platform / LLMOps | "observability", "evals", "pipelines", "monitoring", "reliability" |
-| Agentic / Automation | "agent", "HITL", "orchestration", "workflow", "multi-agent" |
-| Technical AI PM | "PRD", "roadmap", "discovery", "stakeholder", "product manager" |
-| AI Solutions Architect | "architecture", "enterprise", "integration", "design", "systems" |
-| AI Forward Deployed | "client-facing", "deploy", "prototype", "fast delivery", "field" |
-| AI Transformation | "change management", "adoption", "enablement", "transformation" |
+| Senior Frontend Engineer | "React", "TypeScript", "component", "UI", "frontend", "web", "accessibility", "a11y", "responsive" |
+| Design System Engineer | "design system", "design token", "theming", "multi-brand", "Figma", "component library", "brand" |
+| Growth Engineer | "experiment", "A/B", "growth", "metrics", "optimization", "conversion", "PLG", "analytics", "Segment", "feature flag" |
+| Full Stack Engineer | "full stack", "fullstack", "end-to-end", "REST", "API", "microservice", "Node.js", "Next.js" |
+| Developer Experience | "developer experience", "DX", "tooling", "CI/CD", "testing infra", "platform", "internal tools" |
 
 After detecting archetype, read `modes/_profile.md` for the user's specific framing and proof points for that archetype.
+
+**Note:** Many JDs will be hybrids (e.g., "Senior Frontend + Design Systems"). Detect the primary role and use the secondary as framing emphasis.
 
 ## Global Rules
 
@@ -103,7 +104,6 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 
 0. **Cover letter:** If the form allows it, ALWAYS include one. Same visual design as CV. JD quotes mapped to proof points. 1 page max.
 1. Read cv.md, _profile.md, and article-digest.md (if exists) before evaluating
-1b. **First evaluation of each session:** Run `node cv-sync-check.mjs`. If warnings, notify user.
 2. Detect the role archetype and adapt framing per _profile.md
 3. Cite exact lines from CV when matching
 4. Use WebSearch for comp and company data
@@ -126,7 +126,7 @@ After detecting archetype, read `modes/_profile.md` for the user's specific fram
 | Write | Temporary HTML for PDF, applications.md, reports .md |
 | Edit | Update tracker |
 | Canva MCP | Optional visual CV generation. Duplicate base design, edit text, export PDF. Requires `cv.canva_resume_design_id` in profile.yml. |
-| Bash | `node generate-pdf.mjs` |
+| Bash | `node generate-pdf-from-html.mjs` |
 
 ### Time-to-offer priority
 - Working demo + metrics > perfection
@@ -226,7 +226,7 @@ These rules apply to ALL generated text that ends up in candidate-facing documen
 - "demonstrated ability to" / "best practices" (name the practice)
 
 ### Unicode normalization for ATS
-`generate-pdf.mjs` automatically normalizes em-dashes, smart quotes, and zero-width characters to ASCII equivalents for maximum ATS compatibility. But avoid generating them in the first place.
+`generate-pdf-from-html.mjs` automatically normalizes em-dashes, smart quotes, and zero-width characters to ASCII equivalents for maximum ATS compatibility. But avoid generating them in the first place.
 
 ### Vary sentence structure
 - Don't start every bullet with the same verb
@@ -237,3 +237,12 @@ These rules apply to ALL generated text that ends up in candidate-facing documen
 - "Cut p95 latency from 2.1s to 380ms" beats "improved performance"
 - "Postgres + pgvector for retrieval over 12k docs" beats "designed scalable RAG architecture"
 - Name tools, projects, and customers when allowed
+
+### MANDATORY: Humanizer + Em Dash Removal
+
+**Every piece of candidate-facing text** (resume bullets, summary, cover letter, form answers, LinkedIn messages, follow-ups) MUST go through this pipeline:
+
+1. **Run the humanizer skill:** Invoke `/skill:humanizer` on every text block before it goes into HTML or form fields.
+2. **Strip ALL em dashes:** Replace every `—` (U+2014) with a regular hyphen `-`. En dashes `–` (U+2013) also get replaced with `-`. There is no exception. Em dashes are a strong AI-writing signal and ATS-hostile.
+
+**No em dashes ever in generated output.** Period.
