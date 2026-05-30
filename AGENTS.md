@@ -86,8 +86,11 @@ Paste JD URL or text.
 | `scan.mjs` | Zero-token portal scanner (Greenhouse/Ashby/Lever APIs + local parsers) |
 | `providers/` | Scanner provider implementations |
 | `portals.yml` | Query and company config |
-| `render-resume-html.mjs` | Resume HTML from portfolio TypeScript data (supports `--override`) |
-| `generate-pdf-from-html.mjs` | HTML -> PDF via Playwright |
+| `generate-resume-pdf.mjs` | **PREFERRED** - Resume PDF via Typst typesetting. Reads career-data.ts via tsx, applies overrides, writes JSON, shells out to typst compile. Roboto + Source Sans 3 fonts |
+| `generate-pdf-from-html.mjs` | Dual mode: Typst cover letter (preferred, --body/--body-file) or legacy Playwright HTML→PDF |
+| `templates/resume.typ` | Typst resume template (header, summary, skills, experience, education, footer) |
+| `templates/cover-letter.typ` | Typst cover letter template (matching resume header + body + closing) |
+| `templates/icons/` | SVG icons for contact row (mail, globe, linkedin, github) |
 | `application-form.mjs` | Playwright form field extraction + draft answer generation |
 | `normalize-typography.mjs` | ATS-safe typography normalization |
 | `check-liveness.mjs` / `liveness-*.mjs` | Job posting liveness verification |
@@ -140,6 +143,29 @@ Paste JD URL or text.
 ## Resume Source of Truth
 
 - **Canonical data:** `~/dev/portfolio/lib/career-data.ts` (3 variants: default/growth/product)
-- **Generated:** Standalone HTML via `render-resume-html.mjs` (tsx import, no Next.js caching)
-- **Fonts:** Source Sans 3 (body) + Roboto (headings), accent color `#0395de`
-- **No portfolio files modified during application prep** -- override JSON approach
+- **Generated:** PDF via `generate-resume-pdf.mjs` (Typst typesetting, reads career-data.ts via tsx, applies override JSON, writes JSON, calls `typst compile`). Named `Fabricio-Pirini-{COMPANY}-Resume.pdf`
+- **Cover letter:** PDF via `generate-pdf-from-html.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. No accompanying HTML needed.
+- **Workflow:** Reads career data → writes JSON → `typst compile templates/resume.typ` → PDF. No dev server, no Playwright, no npm rendering deps.
+- **Fonts:** Source Sans 3 (body) + Roboto (headings), accent color `#0395de`, TTF files in `lib/fonts/` (loaded via `--font-path`)
+- **Typst binary:** `~/.typst/bin/typst` (install via `install.sh`)
+- **No portfolio files touched** -- override JSON approach, career data read-only via tsx import
+
+## Session Learnings (May 2026)
+
+### Cover letter naming convention
+Cover letters follow resume naming: `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. Not `{###}-{company}-cover-letter.pdf`.
+
+### application-form.mjs ESM fix
+`.mjs` extension forces ESM mode. `require()` is not available. All imports must use ESM `import` syntax. The `parseReport()` function previously used `require('fs').readFileSync()` — fixed to use `import { readFileSync } from 'fs'`.
+
+### PDF generation via Typst (May 2026)
+Replaced `@json-render/react-pdf` with Typst typesetting. `generate-resume-pdf.mjs` writes career data as JSON, shells out to `typst compile templates/resume.typ`. Templates at `templates/resume.typ` and `templates/cover-letter.typ`. SVG icons in `templates/icons/`. Fonts loaded from `lib/fonts/` via `--font-path`. Typst binary at `~/.typst/bin/typst`. Old react-pdf files deleted: `lib/resume-catalog.mjs`, `lib/resume-spec.mjs`, `lib/cover-letter-spec.mjs`. Dependencies removed: `@json-render/core`, `@json-render/react-pdf`.
+
+### Ashby tab-based forms
+Ashby uses tabs (Overview / Application) instead of a separate Apply URL/page. The `application-form.mjs` script only searches for Apply buttons/links, not tabs. When processing Ashby jobs, manually click the Application tab via Playwright before calling form extraction.
+
+### TSV tracker additions
+merge-tracker.mjs does not skip header rows in TSV files. Use pipe-delimited markdown table rows (starting with `|`) instead of tab-separated values with headers. Example:
+```
+| 2 | 2026-05-27 | Clipboard | Role | 2.5/5 | Evaluated | ❌ | [002](reports/002-...) | Notes |
+```

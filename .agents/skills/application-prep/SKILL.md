@@ -56,43 +56,57 @@ Override keys:
 ### Step 3 — Generate Resume PDF
 
 ```bash
-node render-resume-html.mjs output/{###}-{company}-resume.html --variant=default --override=output/{###}-{company}-override.json
-node generate-pdf-from-html.mjs output/{###}-{company}-resume.html output/{###}-{company}-resume.pdf
+node generate-resume-pdf.mjs output/Fabricio-Pirini-{COMPANY}-Resume.pdf --variant=default --override=output/{###}-{company}-override.json
 ```
 
-The `render-resume-html.mjs` script uses `tsx` to import the actual TypeScript data from the portfolio, then renders a standalone HTML page. No Next.js caching issues.
+The `generate-resume-pdf.mjs` script reads career data from portfolio (via tsx), applies overrides, writes JSON, and renders to PDF via Typst typesetting. No Playwright, no dev server, no heavy npm deps. Uses the same fonts (Roboto + Source Sans 3) and accent color (#0395de). Typst binary at `~/.typst/bin/typst`.
+
+Cover letter also uses the spec-based pipeline:
+```bash
+node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf --body "$(cat output/{###}-{company}-cover-letter.txt)"
+```
+
+Or with company name for salutation:
+```bash
+node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
+  --body-file output/{###}-{company}-cover-letter.txt \
+  --company "{COMPANY}" --date "$(date '+%B %d, %Y')"
+```
+
+The Typst cover letter uses the same fonts and colors as the resume (Roboto headings, Source Sans 3 body, #0395de accent) for visual consistency.
 
 ### Step 4 — Generate Cover Letter
 
-Create a cover letter HTML that **visually matches the portfolio's resume** — use `~/dev/portfolio/app/resume/variants/ResumeContent.tsx` as the source of truth for styling, not the live URL.
+Create cover letter text (NOT HTML — the Typst renderer handles styling). Write plain text paragraphs, separated by double newlines.
 
-**Design spec (match portfolio resume exactly):**
-- Body font: Source Sans 3 (loaded from `~/dev/portfolio/public/fonts/source-sans-3-latin.woff2`)
-- Heading font: Roboto (loaded from `~/dev/portfolio/public/fonts/roboto-latin.woff2`)
-- Accent color: `#0395de` (bright blue)
-- Header: Name (Roboto 28px bold, `#111827`), subtitle in small-caps (`#0395de`), location in italic (`#9ca3af`)
-- Contact row: lucide SVG icons (mail, linkedin, globe, github) with gray text, separated by `|`
-- Section headers: first 3 letters in accent color, rest in dark gray e.g. `<span class="ac">Pro</span>fessional Summary`
-- Company names: accent color `#0395de`, Roboto 14px bold
-- Job roles: small-caps, gray
-- Font size: 11px body
-- Print: 2cm padding, max-width 210mm, centered
-- No gradient, no borders — clean and minimal
+The Typst pipeline (`templates/cover-letter.typ`) automatically renders with:
+- Roboto headings + Source Sans 3 body (same fonts as resume)
+- #0395de accent color
+- Matching header with name, subtitle, location, contact row
+- A4 format with consistent margins
+- No gradient, no borders, clean and minimal
 
-**Structure:**
-1. Header: Name (Roboto bold), subtitle (small-caps blue), location (italic gray), contact row with SVG icons
-2. Date + Hiring Team
-3. Opening: Why you're excited about THIS company (specific, not generic)
-4. Body: Map 2-3 key JD requirements to specific proof points from CV
-5. Gap acknowledgment (if any — be direct, offer mitigation)
-6. Closing: Call to action
-7. Signature
+**Structure (plain text paragraphs):**
+1. Opening: Why you're excited about THIS company (specific, not generic)
+2. Body: Map 2-3 key JD requirements to specific proof points from CV
+3. Gap acknowledgment (if any — be direct, offer mitigation)
+4. Closing: Call to action
 
 **Content rules:**
+- Write ONLY the body paragraphs (2-3 short paragraphs). Do NOT include date, salutation, or signature — the spec renderer adds those automatically.
 - Directly quote JD phrases and map to CV achievements
 - Be specific: name tools, projects, metrics
 - No fluff, no corporate-speak
-- 1 page max
+- 1 page max (about 15-20 lines of body text)
+
+Save the cover letter text to `output/{###}-{company}-cover-letter.txt` for the spec-based pipeline:
+```bash
+node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
+  --body-file output/{###}-{company}-cover-letter.txt \
+  --company "{COMPANY}" --date "$(date '+%B %d, %Y')"
+```
+
+**Tip:** The body file should contain only the body paragraphs (no salutation, no date, no signature). The spec adds: header with name/contact, date, salutation (from --company), your paragraphs, and a professional closing.
 
 ### Step 5 — Humanize All Text (MANDATORY)
 
@@ -139,8 +153,21 @@ function normalizeTypography(text) {
 
 ### Step 7 — Generate Cover Letter PDF
 
+Use the Typst pipeline (no Playwright, matches resume design):
+
 ```bash
-node generate-pdf-from-html.mjs output/{###}-{company}-cover-letter.html output/{###}-{company}-cover-letter.pdf
+node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
+  --body-file output/{###}-{company}-cover-letter.txt \
+  --company "{COMPANY}"
+```
+
+The cover letter is rendered via Typst using the same fonts and colors as the resume PDF. No react-pdf, no catalog components.
+
+---
+
+**Legacy HTML route** (still works, but less consistent):
+```bash
+node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.html output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf
 ```
 
 ### Step 8 — Extract Form Fields + Generate Application Answers
@@ -196,33 +223,43 @@ Update the existing tracker entry with:
 
 ## Scripts
 
-### render-resume-html.mjs
+### generate-resume-pdf.mjs (PREFERRED)
 
-Located in `career-ops/`. Uses `tsx` to import TypeScript data, renders standalone HTML. No regex-based parsing.
+Located in `career-ops/`. Reads career data from portfolio via tsx, applies overrides, writes JSON, calls `typst compile`. Uses same fonts (Roboto + Source Sans 3) and accent (#0395de) as portfolio resume. Requires Typst binary at `~/.typst/bin/typst`.
 
 ```bash
-node render-resume-html.mjs output/{name}.html [--variant=default|growth|product]
+node generate-resume-pdf.mjs output/{name}.pdf [--variant=default|growth|product] [--override=<path>]
 ```
+
+### render-resume-html.mjs (REMOVED)
+
+Deleted. Use `generate-resume-pdf.mjs` via Typst instead.
 
 ### generate-pdf-from-html.mjs
 
-Located in `career-ops/`. Simple Playwright-based HTML → PDF generator.
+Two modes:
+- **Spec mode** (preferred for cover letters): Typst typesetting with resume-matching design
+- **HTML mode** (legacy): Playwright-based HTML → PDF
 
 ```bash
+# Spec mode (preferred)
+node generate-pdf-from-html.mjs output/letter.pdf --body "Cover letter text..." [--company "Acme Corp"] [--date "May 27, 2026"]
+
+# Spec mode from file
+node generate-pdf-from-html.mjs output/letter.pdf --body-file path/to/text.txt --company "Acme Corp"
+
+# HTML mode (legacy)
 node generate-pdf-from-html.mjs input.html output.pdf [--format=letter|a4]
 ```
-
-_(customize-resume.mjs is obsolete — use the override JSON approach in Step 2 instead.)_
 
 ## Output Files
 
 All go in `career-ops/output/`:
 
 - `{###}-{company}-override.json` — Resume customizations (optional, per-application)
-- `{###}-{company}-resume.html` — Standalone resume HTML
-- `{###}-{company}-resume.pdf` — Resume PDF
-- `{###}-{company}-cover-letter.html` — Cover letter HTML (matches resume design)
-- `{###}-{company}-cover-letter.pdf` — Cover letter PDF
+- `Fabricio-Pirini-{COMPANY}-Resume.pdf` — Resume PDF (e.g. `Fabricio-Pirini-Infisical-Resume.pdf`)
+- `Fabricio-Pirini-{COMPANY}-Cover-Letter.html` — Cover letter HTML (matches resume design)
+- `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf` — Cover letter PDF
 - `{###}-{company}-form-answers.md` — Application form draft answers
 
 ## The Rule

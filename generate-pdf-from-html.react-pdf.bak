@@ -4,38 +4,29 @@
  * generate-pdf-from-html.mjs — HTML/text → PDF
  *
  * Two modes:
- *   1. Spec mode (preferred): Cover letter via Typst typesetting
+ *   1. Spec mode (preferred): Builds cover letter PDF via @json-render/react-pdf
  *   2. HTML mode (legacy): Reads HTML file, renders via Playwright
  *
  * Usage:
  *   # Spec mode — cover letter with resume-matching design
- *   node generate-pdf-from-html.mjs <output.pdf> --body "Cover letter text..." [--company "Acme Corp"] [--date "May 29, 2026"]
+ *   node generate-pdf-from-html.mjs <output.pdf> --body="Cover letter text..." [--company "Acme Corp"]
  *
  *   # Spec mode from file
- *   node generate-pdf-from-html.mjs <output.pdf> --body-file=<path> [--company "Acme Corp"] [--date "May 29, 2026"]
+ *   node generate-pdf-from-html.mjs <output.pdf> --body-file=<path> [--company "Acme Corp"]
  *
- *   # HTML mode (Playwright, legacy)
+ *   # HTML mode (Playwright)
  *   node generate-pdf-from-html.mjs <input.html> <output.pdf> [--format=a4|letter]
  */
 
 import { chromium } from 'playwright';
 import { resolve, dirname } from 'path';
-import { readFile, mkdir, writeFile, rm } from 'fs/promises';
-import { existsSync, statSync } from 'fs';
-import { execSync } from 'child_process';
+import { readFile, mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
-import os from 'os';
+import { renderToFile } from '@json-render/react-pdf';
+import { buildCoverLetterSpec } from './lib/cover-letter-spec.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TYPST_BIN = resolve(os.homedir(), '.typst/bin/typst');
-const TYPST_TEMPLATE = resolve(__dirname, 'templates/cover-letter.typ');
-const FONT_PATH = resolve(__dirname, 'lib/fonts');
-
-function log(l, m) {
-  const t = new Date().toISOString().split('T')[1].split('.')[0];
-  const p = { i: '📋', s: '✅', w: '⚠️', e: '❌' };
-  console.log(`${p[l] || 'ℹ️'} [${t}] ${m}`);
-}
 
 async function renderViaPlaywright(inputPath, outputPath, format) {
   let html = await readFile(inputPath, 'utf-8');
@@ -69,68 +60,27 @@ async function renderViaPlaywright(inputPath, outputPath, format) {
       margin: { top: '0.2in', right: '0.2in', bottom: '0.2in', left: '0.2in' },
     });
 
+    const { statSync } = await import('fs');
     const stats = statSync(outputPath);
-    log('s', `PDF: ${outputPath} (${(stats.size / 1024).toFixed(1)} KB)`);
+    console.log(`✅ PDF: ${outputPath} (${(stats.size / 1024).toFixed(1)} KB)`);
   } finally {
     await browser.close();
   }
 }
 
-async function renderViaTypst(body, outputPath, opts) {
-  const paragraphs = body
-    .split('\n\n')
-    .map(p => p.replace(/\n/g, ' ').trim())
-    .filter(Boolean);
-
-  if (paragraphs.length === 0) {
-    log('e', 'No body text provided');
-    process.exit(1);
-  }
-
-  const dt = opts.date || new Date().toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
+async function renderViaSpec(body, outputPath, opts) {
+  const { spec, registry } = buildCoverLetterSpec({
+    body,
+    date: opts.date,
+    company: opts.company,
   });
-  const greeting = opts.company
-    ? `Dear ${opts.company} Hiring Team,`
-    : 'Dear Hiring Team,';
-
-  const typstData = {
-    name: 'Fabricio Tramontano Pirini',
-    subtitle: 'Full Stack Engineer',
-    location: 'Brazil (UTC -3)',
-    contact: [
-      { text: 'fabricio@fabriciopirini.com' },
-      { text: 'linkedin.com/in/fabriciopirini' },
-      { text: 'github.com/fabriciopirini' },
-      { text: 'fabriciopirini.com' },
-    ],
-    date: dt,
-    greeting,
-    paragraphs,
-    closing: 'Best regards,',
-  };
-
-  const dataJsonPath = resolve(__dirname, 'templates/data.json');
-  await writeFile(dataJsonPath, JSON.stringify(typstData, null, 2), 'utf-8');
 
   await mkdir(dirname(outputPath), { recursive: true });
-  log('i', `Compiling cover letter with Typst: ${outputPath}...`);
+  await renderToFile(spec, outputPath, { registry });
 
-  try {
-    execSync(
-      `${TYPST_BIN} compile --font-path ${FONT_PATH} ${TYPST_TEMPLATE} ${outputPath}`,
-      { stdio: 'inherit', cwd: __dirname },
-    );
-  } catch (e) {
-    log('e', 'Typst compilation failed');
-    log('i', `Data JSON preserved at: ${dataJsonPath}`);
-    process.exit(1);
-  }
-
-  await rm(dataJsonPath, { force: true });
-
+  const { statSync } = await import('fs');
   const stats = statSync(outputPath);
-  log('s', `PDF: ${outputPath} (${(stats.size / 1024).toFixed(1)} KB)`);
+  console.log(`✅ PDF: ${outputPath} (${(stats.size / 1024).toFixed(1)} KB)`);
 }
 
 async function main() {
@@ -146,19 +96,27 @@ async function main() {
   // Detect mode: spec mode if any --body* flag present
   const isSpecMode = args.some(a => a.startsWith('--body'));
 
+  // Collect positional args (non-flag)
+  const positional = [];
+
   for (const arg of args) {
+    if (arg === '--format' || arg === '--body-file' || arg === '--date' || arg === '--company') continue;
+    if (arg.startsWith('--format=')) { format = arg.split('=')[1]; continue; }
     if (arg.startsWith('--body-file=')) { bodyFile = arg.split('=')[1]; continue; }
     if (arg.startsWith('--date=')) { date = arg.split('=')[1]; continue; }
     if (arg.startsWith('--company=')) { company = arg.split('=')[1]; continue; }
     if (arg.startsWith('--body=')) { body = arg.split('=')[1]; continue; }
-    if (arg.startsWith('--format=')) { format = arg.split('=')[1]; continue; }
     if (arg.startsWith('--')) continue;
-    if (isSpecMode) {
-      if (!outputPath) { outputPath = resolve(arg); }
-    } else {
-      if (!inputPath) { inputPath = resolve(arg); }
-      else if (!outputPath) { outputPath = resolve(arg); }
-    }
+    positional.push(arg);
+  }
+
+  if (isSpecMode) {
+    // Spec mode: output.pdf [--body=...] [--body-file=...]
+    outputPath = positional[0] ? resolve(positional[0]) : null;
+  } else {
+    // HTML mode: input.html output.pdf
+    inputPath = positional[0] ? resolve(positional[0]) : null;
+    outputPath = positional[1] ? resolve(positional[1]) : null;
   }
 
   // Handle --body-file (read file after args parsed)
@@ -166,20 +124,20 @@ async function main() {
     body = await readFile(resolve(bodyFile), 'utf-8');
   }
 
-  // Spec mode (Typst)
+  // Spec mode
   if (isSpecMode) {
     if (!outputPath || !body) {
-      console.error(`Usage: node generate-pdf-from-html.mjs <output.pdf> --body="text..." [--company "Acme Corp"] [--date "May 29, 2026"]`);
-      console.error(`   or: node generate-pdf-from-html.mjs <output.pdf> --body-file=<path> [--company "Acme Corp"] [--date "May 29, 2026"]`);
+      console.error(`Usage: node generate-pdf-from-html.mjs <output.pdf> --body="text..." [--company "Acme Corp"]`);
+      console.error(`   or: node generate-pdf-from-html.mjs <output.pdf> --body-file=<path> [--company "Acme Corp"]`);
       process.exit(1);
     }
 
-    await renderViaTypst(body, outputPath, { date, company });
+    await renderViaSpec(body, outputPath, { date, company });
     process.stdout.write(outputPath + '\n');
     return;
   }
 
-  // HTML mode (Playwright)
+  // HTML mode
   if (!inputPath || !outputPath) {
     console.error('Usage (HTML mode): node generate-pdf-from-html.mjs <input.html> <output.pdf> [--format=a4|letter]');
     console.error('Usage (spec mode):   node generate-pdf-from-html.mjs <output.pdf> --body="text..." [--company "Acme Corp"]');
