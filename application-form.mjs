@@ -18,7 +18,7 @@
 
 import { chromium } from 'playwright';
 import { readFile, writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -440,7 +440,7 @@ function slugify(s) {
 // ============================================================
 
 function parseReport(reportPath) {
-  const content = require('fs').readFileSync(reportPath, 'utf-8');
+  const content = readFileSync(reportPath, 'utf-8');
   const scoreMatch = content.match(/\*\*Score:\*\*\s*([\d.]+)\/5/);
   const archetypeMatch = content.match(/\*\*Archetype:\*\*\s*(.+)/);
   const companyMatch = content.match(/^# Evaluation:\s*(.+?)\s*—/);
