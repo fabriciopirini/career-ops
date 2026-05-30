@@ -5,10 +5,12 @@
   "scripts": {
     "doctor": "node doctor.mjs",
     "verify": "node verify-pipeline.mjs",
+    "resume": "node generate-resume-pdf.mjs",
+    "letter": "node generate-pdf-from-html.mjs",
+    "typst": "~/.typst/bin/typst",
     "normalize": "node normalize-statuses.mjs",
     "dedup": "node dedup-tracker.mjs",
     "merge": "node merge-tracker.mjs",
-    "pdf": "node generate-pdf.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "update:check": "node update-system.mjs check",
     "update": "node update-system.mjs apply",
