@@ -6,6 +6,7 @@
     "doctor": "node doctor.mjs",
     "verify": "node verify-pipeline.mjs",
     "resume": "node generate-resume-pdf.mjs",
+    "watch:resume": "node watch-resume.mjs",
     "letter": "node generate-pdf-from-html.mjs",
     "typst": "~/.typst/bin/typst",
     "normalize": "node normalize-statuses.mjs",
@@ -41,5 +42,8 @@
     "dotenv": "^17.0.0",
     "js-yaml": "^4.1.1",
     "playwright": "^1.58.1"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0"
   }
 }

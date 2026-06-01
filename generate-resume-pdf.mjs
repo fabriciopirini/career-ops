@@ -101,8 +101,8 @@ function buildTypstData(data, override) {
     contact: [
       { href: 'mailto:fabricio@fabriciopirini.com', text: 'fabricio@fabriciopirini.com', icon: 'mail' },
       { href: 'https://fabriciopirini.com', text: 'fabriciopirini.com', icon: 'globe' },
-      { href: 'https://linkedin.com/in/fabriciopirini', text: 'linkedin.com/in/fabriciopirini', icon: 'linkedin' },
-      { href: 'https://github.com/fabriciopirini', text: 'github.com/fabriciopirini', icon: 'github' },
+      { href: 'https://linkedin.com/in/fabriciopirini', text: 'fabriciopirini', icon: 'linkedin' },
+      { href: 'https://github.com/fabriciopirini', text: 'fabriciopirini', icon: 'github' },
     ],
     summary,
     skills: data.skills,
