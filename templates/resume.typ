@@ -161,7 +161,7 @@
     }
 
     // Role + period on same line
-    role-grid(period.role, period.start, period.end)
+    #role-grid(period.role, period.start, period.end)
 
     // Bullets
     #if period.bullets != none and period.bullets.len() > 0 [
@@ -181,6 +181,6 @@
 
 #for edu in data.education [
   #set par(spacing: 0pt)
-  edu-grid(edu.school, edu.location, edu.degree, edu.years)
+  #edu-grid(edu.school, edu.location, edu.degree, edu.years)
   #v(sp-job-between)
 ]
