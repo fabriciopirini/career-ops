@@ -86,10 +86,14 @@ Paste JD URL or text.
 | `scan.mjs` | Zero-token portal scanner (Greenhouse/Ashby/Lever APIs + local parsers) |
 | `providers/` | Scanner provider implementations |
 | `portals.yml` | Query and company config |
-| `generate-resume-pdf.mjs` | **PREFERRED** - Resume PDF via Typst typesetting. Reads career-data.ts via tsx, applies overrides, writes JSON, shells out to typst compile. Roboto + Source Sans 3 fonts |
-| `generate-pdf-from-html.mjs` | Dual mode: Typst cover letter (preferred, --body/--body-file) or legacy Playwright HTML→PDF |
-| `templates/resume.typ` | Typst resume template (header, summary, skills, experience, education, footer) |
-| `templates/cover-letter.typ` | Typst cover letter template (matching resume header + body + closing) |
+| `scripts/generate-resume.mjs` | Resume PDF via Typst typesetting. Reads career-data.ts via tsx, applies overrides, writes JSON, shells out to typst compile. Supports --watch, --dry-run, --validate flags |
+| `scripts/generate-cover.mjs` | Cover letter PDF via Typst. Reads body text (or --body-file), constructs data, compiles cover-letter.typ. Supports --watch, --dry-run, --validate flags |
+| `scripts/generate-all.mjs` | Bundle command: generates both resume and cover letter with shared override. Use --company="Acme" to name files |
+| `lib/config.mjs` | Shared configuration (TYPST_BIN, FONT_PATH, DATA_FILE, logging utilities) |
+| `lib/typst-util.mjs` | Typst utilities (compileTypst, writeDataJson, cleanupDataJson, validateData, showDataPreview) |
+| `templates/resume.typ` | Typst resume template with inline color/font/spacing constants for easy tweaking |
+| `templates/cover-letter.typ` | Typst cover letter template matching resume styling |
+| `templates/vars.typ` | Manual override file for colors/sizes/spacing (optional, not yet integrated) |
 | `templates/icons/` | SVG icons for contact row (mail, globe, linkedin, github) |
 | `application-form.mjs` | Playwright form field extraction + draft answer generation |
 | `normalize-typography.mjs` | ATS-safe typography normalization |
@@ -143,8 +147,9 @@ Paste JD URL or text.
 ## Resume Source of Truth
 
 - **Canonical data:** `~/dev/portfolio/lib/career-data.ts` (3 variants: default/growth/product)
-- **Generated:** PDF via `generate-resume-pdf.mjs` (Typst typesetting, reads career-data.ts via tsx, applies override JSON, writes JSON, calls `typst compile`). Named `Fabricio-Pirini-{COMPANY}-Resume.pdf`
-- **Cover letter:** PDF via `generate-pdf-from-html.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. No accompanying HTML needed.
+- **Resume PDF:** Via `scripts/generate-resume.mjs` (Typst typesetting, reads career-data.ts via tsx, applies override JSON, writes JSON, calls `typst compile`). Named `Fabricio-Pirini-{COMPANY}-Resume.pdf`
+- **Cover letter PDF:** Via `scripts/generate-cover.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. No accompanying HTML needed.
+- **Bundle command:** `scripts/generate-all.mjs --company="Acme"` generates both PDFs in one run with shared override and naming.
 - **Workflow:** Reads career data → writes JSON → `typst compile templates/resume.typ` → PDF. No dev server, no Playwright, no npm rendering deps.
 - **Fonts:** Source Sans 3 (body) + Roboto (headings), accent color `#0395de`, TTF files in `lib/fonts/` (loaded via `--font-path`)
 - **Typst binary:** `~/.typst/bin/typst` (install via `install.sh`)
@@ -169,3 +174,55 @@ merge-tracker.mjs does not skip header rows in TSV files. Use pipe-delimited mar
 ```
 | 2 | 2026-05-27 | Clipboard | Role | 2.5/5 | Evaluated | ❌ | [002](reports/002-...) | Notes |
 ```
+
+## Typst Workflow Improvements (June 2026)
+
+### DX improvements
+- **Shared utilities:** `lib/config.mjs` and `lib/typst-util.mjs` extract shared configuration and Typst helper functions
+- **Scripts reorganized:** `scripts/` directory contains `generate-resume.mjs`, `generate-cover.mjs`, `generate-all.mjs` for cleaner structure
+- **New flags:**
+  - `--watch`: Auto-recompile on template/data changes (via `typst watch`)
+  - `--dry-run`: Show data JSON preview without compilation
+  - `--validate`: Validate data structure against schema before compilation
+- **Bundle command:** `scripts/generate-all.mjs` generates both resume and cover letter with shared override and consistent naming (`Fabricio-Pirini-{COMPANY}-Resume.pdf` + `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`)
+- **Template constants:** Inline color/font/spacing constants in `templates/resume.typ` for easy global styling tweaks
+- **Better error messages:** Clear logging with timestamps and icons for easier debugging
+
+### Usage examples
+
+```bash
+# Generate resume with variant
+node scripts/generate-resume.mjs output/Acme-Resume.pdf --variant=growth --override=output/acme-override.json
+
+# Generate cover letter from file
+node scripts/generate-cover.mjs output/Acme-Cover.pdf --body-file=output/cover-letter.txt --company="Acme Corp"
+
+# Generate both with bundle command
+node scripts/generate-all.mjs --company="Acme" --variant=growth --override=output/acme-override.json --body-file=output/cover-letter.txt
+
+# Dry-run to preview data
+node scripts/generate-resume.mjs output/Acme-Resume.pdf --dry-run
+
+# Validate data structure
+node scripts/generate-cover.mjs output/Acme-Cover.pdf --body="..." --validate
+
+# Watch mode for live preview
+node scripts/generate-resume.mjs output/Acme-Resume.pdf --watch
+```
+
+### Template styling
+Edit inline constants in `templates/resume.typ` to tweak:
+- `accent`, `dark`, `body-color`, `muted`, `gray` - Colors
+- `fonts` - Font stack (default: `("Source Sans 3", "Roboto")`)
+- `sp-job-between`, `sp-bullet-between`, `sp-role-between`, etc. - Spacing
+- `size-body`, `size-header`, `size-name`, etc. - Font sizes
+- `section-header`, `job-grid`, `role-grid`, `edu-grid` - Helper functions
+
+### Known limitations
+- `templates/common.typ` exists but Typst `#include` doesn't export variables as expected. Templates have inline constants for now.
+- `templates/vars.typ` exists for manual overrides but isn't integrated yet (manual editing of inline constants required).
+
+### Backward compatibility
+- `generate-resume-pdf.mjs` and `generate-pdf-from-html.mjs` (root-level) remain for backward compatibility but are deprecated.
+- New scripts in `scripts/` directory have better DX, validation, and watch mode support.
+- Old scripts will be removed in a future update.
