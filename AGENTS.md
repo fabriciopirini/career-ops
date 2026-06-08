@@ -148,7 +148,7 @@ Paste JD URL or text.
 
 - **Canonical data:** `~/dev/portfolio/lib/career-data.ts` (3 variants: default/growth/product)
 - **Resume PDF:** Via `scripts/generate-resume.mjs` (Typst typesetting, reads career-data.ts via tsx, applies override JSON, writes JSON, calls `typst compile`). Named `Fabricio-Pirini-{COMPANY}-Resume.pdf`
-- **Cover letter PDF:** Via `scripts/generate-cover.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. No accompanying HTML needed.
+- **Cover letter PDF:** Via `scripts/generate-cover.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-Cover-Letter.pdf` inside `output/{company-slug}/{timestamp}[-{role}]/`. No accompanying HTML needed.
 - **Bundle command:** `scripts/generate-all.mjs --company="Acme"` generates both PDFs in one run with shared override and naming.
 - **Workflow:** Reads career data → writes JSON → `typst compile templates/resume.typ` → PDF. No dev server, no Playwright, no npm rendering deps.
 - **Fonts:** Source Sans 3 (body) + Roboto (headings), accent color `#0395de`, TTF files in `lib/fonts/` (loaded via `--font-path`)
@@ -158,7 +158,7 @@ Paste JD URL or text.
 ## Session Learnings (May 2026)
 
 ### Cover letter naming convention
-Cover letters follow resume naming: `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`. Not `{###}-{company}-cover-letter.pdf`.
+All artifacts go under `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/`. Inside: `Fabricio-Pirini-Resume.pdf`, `Fabricio-Pirini-Cover-Letter.pdf`, `form-answers.md`, `override.json`. --role is mandatory.
 
 ### application-form.mjs ESM fix
 `.mjs` extension forces ESM mode. `require()` is not available. All imports must use ESM `import` syntax. The `parseReport()` function previously used `require('fs').readFileSync()` — fixed to use `import { readFileSync } from 'fs'`.
@@ -192,22 +192,22 @@ merge-tracker.mjs does not skip header rows in TSV files. Use pipe-delimited mar
 
 ```bash
 # Generate resume with variant
-node scripts/generate-resume.mjs output/Acme-Resume.pdf --variant=growth --override=output/acme-override.json
+node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --variant=growth --override=output/acme/override.json
 
 # Generate cover letter from file
-node scripts/generate-cover.mjs output/Acme-Cover.pdf --body-file=output/cover-letter.txt --company="Acme Corp"
+node scripts/generate-cover.mjs output/acme/Fabricio-Pirini-Cover-Letter.pdf --body-file=output/cover-letter.txt --company="Acme Corp"
 
-# Generate both with bundle command
-node scripts/generate-all.mjs --company="Acme" --variant=growth --override=output/acme-override.json --body-file=output/cover-letter.txt
+# Generate both with bundle command (auto-nests under output/acme/YYYY-MM-DD[-role]/)
+node scripts/generate-all.mjs --company="Acme" --role="Senior Frontend" --variant=growth --override=output/acme/override.json --body-file=output/cover-letter.txt
 
 # Dry-run to preview data
-node scripts/generate-resume.mjs output/Acme-Resume.pdf --dry-run
+node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --dry-run
 
 # Validate data structure
-node scripts/generate-cover.mjs output/Acme-Cover.pdf --body="..." --validate
+node scripts/generate-cover.mjs output/acme/Fabricio-Pirini-Cover-Letter.pdf --body="..." --validate
 
 # Watch mode for live preview
-node scripts/generate-resume.mjs output/Acme-Resume.pdf --watch
+node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --watch
 ```
 
 ### Template styling

@@ -160,17 +160,23 @@
       v(sp-header-gap)
     }
 
-    // Role + period on same line
-    #role-grid(period.role, period.start, period.end)
-
-    // Bullets
-    #if period.bullets != none and period.bullets.len() > 0 [
-      #v(16pt)
-      #for bullet in period.bullets [
+    // Role + first bullet stay together (avoid orphan role at page bottom)
+    #block(breakable: false)[
+      #role-grid(period.role, period.start, period.end)
+      #if period.bullets != none and period.bullets.len() > 0 [
+        #v(16pt)
+        #list(marker: [•], indent: 0pt)[
+          #text(size: size-skills, fill: body-color)[#period.bullets.at(0)]
+        ]
+      ]
+    ]
+    // Remaining bullets can break across pages normally
+    #if period.bullets != none and period.bullets.len() > 1 [
+      #for bullet in period.bullets.slice(1) [
+        #v(sp-bullet-between)
         #list(marker: [•], indent: 0pt)[
           #text(size: size-skills, fill: body-color)[#bullet]
         ]
-        #v(sp-bullet-between)
       ]
     ]
   ]

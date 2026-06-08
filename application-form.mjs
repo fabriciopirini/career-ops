@@ -396,9 +396,9 @@ function generateDraftAnswers(questions, company, role, reportData, careerData, 
     } else if (q.type === 'file') {
       lines.push(`## ${q.label} (file upload)`);
       lines.push('');
-      lines.push(`> Upload the generated PDF. Resume: \`output/${slug}-resume.pdf\``);
+      lines.push(`> Upload the generated PDF. Resume: \`Fabricio-Pirini-Resume.pdf\` (same folder as this file)`);
       if (q.category === 'cover_letter_upload') {
-        lines.push(`> Cover letter: \`output/${slug}-cover-letter.pdf\``);
+        lines.push(`> Cover letter: \`Fabricio-Pirini-Cover-Letter.pdf\` (same folder)`);
       }
       lines.push('');
     } else {
@@ -554,7 +554,9 @@ async function main() {
 
   // Write output
   if (!outputPath) {
-    outputPath = resolve(__dirname, 'output', `${slugify(company)}-form-answers.md`);
+    const companySlug = slugify(company);
+    const today = new Date().toISOString().slice(0, 10);
+    outputPath = resolve(__dirname, 'output', companySlug, `${today}-${slugify(role)}`, 'form-answers.md');
   }
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, answers, 'utf-8');
