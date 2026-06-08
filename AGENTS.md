@@ -67,7 +67,7 @@ Paste JD URL or text.
 | Step | What it does |
 |------|-------------|
 | 1 | Read evaluation report + portfolio data |
-| 2 | Create `output/{###}-{company}-override.json` (subtitle, summary, per-job bullet overrides) |
+| 2 | Create `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/override.json` (subtitle, summary, per-job bullet overrides) |
 | 3 | Render resume HTML via `render-resume-html.mjs --override=...` |
 | 4 | Generate cover letter HTML matching portfolio design |
 | 5 | Humanize ALL text via `/skill:humanizer` (MANDATORY) |
@@ -148,7 +148,7 @@ Paste JD URL or text.
 
 - **Canonical data:** `~/dev/portfolio/lib/career-data.ts` (3 variants: default/growth/product)
 - **Resume PDF:** Via `scripts/generate-resume.mjs` (Typst typesetting, reads career-data.ts via tsx, applies override JSON, writes JSON, calls `typst compile`). Named `Fabricio-Pirini-{COMPANY}-Resume.pdf`
-- **Cover letter PDF:** Via `scripts/generate-cover.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-Cover-Letter.pdf` inside `output/{company-slug}/{timestamp}[-{role}]/`. No accompanying HTML needed.
+- **Cover letter PDF:** Via `scripts/generate-cover.mjs --body-file` (Typst, same fonts/colors as resume). Named `Fabricio-Pirini-Cover-Letter.pdf` inside `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/`. No accompanying HTML needed.
 - **Bundle command:** `scripts/generate-all.mjs --company="Acme"` generates both PDFs in one run with shared override and naming.
 - **Workflow:** Reads career data → writes JSON → `typst compile templates/resume.typ` → PDF. No dev server, no Playwright, no npm rendering deps.
 - **Fonts:** Source Sans 3 (body) + Roboto (headings), accent color `#0395de`, TTF files in `lib/fonts/` (loaded via `--font-path`)
@@ -192,22 +192,22 @@ merge-tracker.mjs does not skip header rows in TSV files. Use pipe-delimited mar
 
 ```bash
 # Generate resume with variant
-node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --variant=growth --override=output/acme/override.json
+node scripts/generate-resume.mjs output/acme/2026-06-08-senior-frontend/Fabricio-Pirini-Resume.pdf --variant=growth --override=output/acme/2026-06-08-senior-frontend/override.json
 
 # Generate cover letter from file
-node scripts/generate-cover.mjs output/acme/Fabricio-Pirini-Cover-Letter.pdf --body-file=output/cover-letter.txt --company="Acme Corp"
+node scripts/generate-cover.mjs output/acme/2026-06-08-senior-frontend/Fabricio-Pirini-Cover-Letter.pdf --body-file=output/cover-letter.txt --company="Acme Corp"
 
-# Generate both with bundle command (auto-nests under output/acme/YYYY-MM-DD[-role]/)
-node scripts/generate-all.mjs --company="Acme" --role="Senior Frontend" --variant=growth --override=output/acme/override.json --body-file=output/cover-letter.txt
+# Generate both with bundle command
+node scripts/generate-all.mjs --company="Acme" --role="Senior Frontend" --variant=growth --override=output/acme/2026-06-08-senior-frontend/override.json --body-file=output/cover-letter.txt
 
 # Dry-run to preview data
-node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --dry-run
+node scripts/generate-resume.mjs output/acme/2026-06-08-senior-frontend/Fabricio-Pirini-Resume.pdf --dry-run
 
 # Validate data structure
-node scripts/generate-cover.mjs output/acme/Fabricio-Pirini-Cover-Letter.pdf --body="..." --validate
+node scripts/generate-cover.mjs output/acme/2026-06-08-senior-frontend/Fabricio-Pirini-Cover-Letter.pdf --body="..." --validate
 
 # Watch mode for live preview
-node scripts/generate-resume.mjs output/acme/Fabricio-Pirini-Resume.pdf --watch
+node scripts/generate-resume.mjs output/acme/2026-06-08-senior-frontend/Fabricio-Pirini-Resume.pdf --watch
 ```
 
 ### Template styling
