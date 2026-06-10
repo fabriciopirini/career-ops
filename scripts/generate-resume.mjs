@@ -32,7 +32,7 @@ import { execSync } from 'child_process';
 import { resolve, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { CONFIG, log, VALID_VARIANTS, validateVariant, DATA_FILE } from '../lib/config.mjs';
-import { compileTypst, writeDataJson, cleanupDataJson, showDataPreview, validateData } from '../lib/typst-util.mjs';
+import { compileTypst, writeDataJson, cleanupDataJson, showDataPreview, validateData, validateNoDashes } from '../lib/typst-util.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -199,6 +199,14 @@ Options:
 
   // Build Typst JSON
   const typstData = buildTypstData(data, override);
+
+  // Check for em/en dashes (AI-writing signal) — fail early
+  try {
+    validateNoDashes(typstData, 'resume');
+  } catch (e) {
+    log.e(e.message);
+    process.exit(1);
+  }
 
   // Validate if requested
   if (validateOnly) {

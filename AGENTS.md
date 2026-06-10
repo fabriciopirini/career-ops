@@ -226,3 +226,20 @@ Edit inline constants in `templates/resume.typ` to tweak:
 - `generate-resume-pdf.mjs` and `generate-pdf-from-html.mjs` (root-level) remain for backward compatibility but are deprecated.
 - New scripts in `scripts/` directory have better DX, validation, and watch mode support.
 - Old scripts will be removed in a future update.
+
+## Session Learnings (June 2026)
+
+### Humanizer + dash check automated in build pipeline
+`validateNoDashes()` in `lib/typst-util.mjs` recursively scans all candidate-facing text (summary, subtitle, bullets, cover letter paragraphs) for em dashes (\u2014) and en dashes (\u2013). Called automatically by both `generate-resume.mjs` and `generate-cover.mjs` after building data but before Typst compilation. Build fails with exact path and snippet if any dashes found. No PDF gets generated with dashes in it. Still need to run humanizer manually before writing override JSON — the guard only checks for dashes, not AI vocabulary patterns.
+
+### Ashby form snapshot misses Yes/No question labels
+`snapshot -i` on Ashby Application tabs shows Yes/No buttons but NOT the associated question text. Always follow with `get text body` to extract the full form including screening question labels. Otherwise questions 7-9 (screening Yes/No fields) get missed.
+
+### Subagent forked context loses API keys
+`delegate` and `worker` subagents with `context: fork` fail with "No API key found for anthropic." The forked session doesn't inherit auth. For long-running tasks like scan or pipeline evaluation, either run inline or investigate fresh-context subagent with explicit auth setup.
+
+### generate-resume.mjs temp file race condition
+Intermittent `ENOENT: no such file or directory, unlink '/home/pirini/dev/portfolio/.tmp-extract.cjs'` error. Always works on retry. The script creates and cleans up a temp file in the portfolio directory; concurrent runs may race on cleanup. Run resume generation sequentially, not in parallel, to avoid this.
+
+### merge-tracker.mjs single-entry bug
+`merge-tracker.mjs` only processes 1 entry per pipe-delimited TSV file. Multi-entry TSV files need to be split into individual files before merging. Worker subagent reported this during June 10 pipeline run.
