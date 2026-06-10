@@ -184,7 +184,7 @@ merge-tracker.mjs does not skip header rows in TSV files. Use pipe-delimited mar
   - `--watch`: Auto-recompile on template/data changes (via `typst watch`)
   - `--dry-run`: Show data JSON preview without compilation
   - `--validate`: Validate data structure against schema before compilation
-- **Bundle command:** `scripts/generate-all.mjs` generates both resume and cover letter with shared override and consistent naming (`Fabricio-Pirini-{COMPANY}-Resume.pdf` + `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf`)
+- **Bundle command:** `scripts/generate-all.mjs` generates both resume and cover letter with shared override.
 - **Template constants:** Inline color/font/spacing constants in `templates/resume.typ` for easy global styling tweaks
 - **Better error messages:** Clear logging with timestamps and icons for easier debugging
 

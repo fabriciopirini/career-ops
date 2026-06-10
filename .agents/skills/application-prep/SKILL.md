@@ -56,28 +56,21 @@ Override keys:
 ### Step 3 — Generate Resume PDF
 
 ```bash
-node generate-resume-pdf.mjs output/Fabricio-Pirini-{COMPANY}-Resume.pdf --variant=default --override=output/{###}-{company}-override.json
+node scripts/generate-resume.mjs output/{company-slug}/{YYYY-MM-DD}-{role-slug}/Fabricio-Pirini-Resume.pdf --variant=default --override=output/{company-slug}/{YYYY-MM-DD}-{role-slug}/override.json
 ```
 
-The `generate-resume-pdf.mjs` script reads career data from portfolio (via tsx), applies overrides, writes JSON, and renders to PDF via Typst typesetting. No Playwright, no dev server, no heavy npm deps. Uses the same fonts (Roboto + Source Sans 3) and accent color (#0395de). Typst binary at `~/.typst/bin/typst`.
+Files go inside `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/`. The company name is NOT in the filename since the folder already identifies it.
 
-Cover letter also uses the spec-based pipeline:
-```bash
-node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf --body "$(cat output/{###}-{company}-cover-letter.txt)"
-```
+### Step 4 — Cover Letter (ASK FIRST)
 
-Or with company name for salutation:
-```bash
-node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
-  --body-file output/{###}-{company}-cover-letter.txt \
-  --company "{COMPANY}" --date "$(date '+%B %d, %Y')"
-```
+**IMPORTANT: Cover letters are almost never requested.** Most application forms have no cover letter field. Before generating one, check if the form actually has a cover letter upload or text field.
 
-The Typst cover letter uses the same fonts and colors as the resume (Roboto headings, Source Sans 3 body, #0395de accent) for visual consistency.
+**Decision rule:**
+- Form has cover letter field → generate it
+- Form has no cover letter field → skip it (default)
+- Unsure → ask the user, defaulting to skip
 
-### Step 4 — Generate Cover Letter
-
-Create cover letter text (NOT HTML — the Typst renderer handles styling). Write plain text paragraphs, separated by double newlines.
+If generating, create cover letter text (NOT HTML). Write plain text paragraphs, separated by double newlines.
 
 The Typst pipeline (`templates/cover-letter.typ`) automatically renders with:
 - Roboto headings + Source Sans 3 body (same fonts as resume)
@@ -99,14 +92,7 @@ The Typst pipeline (`templates/cover-letter.typ`) automatically renders with:
 - No fluff, no corporate-speak
 - 1 page max (about 15-20 lines of body text)
 
-Save the cover letter text to `output/{###}-{company}-cover-letter.txt` for the spec-based pipeline:
-```bash
-node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
-  --body-file output/{###}-{company}-cover-letter.txt \
-  --company "{COMPANY}" --date "$(date '+%B %d, %Y')"
-```
-
-**Tip:** The body file should contain only the body paragraphs (no salutation, no date, no signature). The spec adds: header with name/contact, date, salutation (from --company), your paragraphs, and a professional closing.
+Save the cover letter text to `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/cover-letter-body.txt`.
 
 ### Step 5 — Humanize All Text (MANDATORY)
 
@@ -151,23 +137,14 @@ function normalizeTypography(text) {
 
 **Check:** After writing HTML, grep for `\u2014` or `—` in the output file. If any found, rewrite those sentences and re-render.
 
-### Step 7 — Generate Cover Letter PDF
+### Step 7 — Generate Cover Letter PDF (only if Step 4 was needed)
 
 Use the Typst pipeline (no Playwright, matches resume design):
 
 ```bash
-node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf \
-  --body-file output/{###}-{company}-cover-letter.txt \
+node scripts/generate-cover.mjs output/{company-slug}/{YYYY-MM-DD}-{role-slug}/Fabricio-Pirini-Cover-Letter.pdf \
+  --body-file output/{company-slug}/{YYYY-MM-DD}-{role-slug}/cover-letter-body.txt \
   --company "{COMPANY}"
-```
-
-The cover letter is rendered via Typst using the same fonts and colors as the resume PDF. No react-pdf, no catalog components.
-
----
-
-**Legacy HTML route** (still works, but less consistent):
-```bash
-node generate-pdf-from-html.mjs output/Fabricio-Pirini-{COMPANY}-Cover-Letter.html output/Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf
 ```
 
 ### Step 8 — Extract Form Fields + Generate Application Answers
@@ -204,7 +181,7 @@ Generate thorough answers for the generic set.
 
 Show the user:
 1. Resume PDF path
-2. Cover letter PDF path
+2. Cover letter PDF path (if generated)
 3. Form answers path
 4. Ask: "Review these. Copy answers into the form. Ready when you want to submit."
 
@@ -214,8 +191,8 @@ node merge-tracker.mjs
 ```
 
 Update the existing tracker entry with:
-- PDF status: ✅ (resume), ✅ (cover letter)
-- Notes: "Application-ready: resume + cover letter + form answers"
+- PDF status: ✅ (resume), ✅ (cover letter if generated)
+- Notes: "Application-ready: resume [+ cover letter] + form answers"
 
 ### Step 10 — Done (no restore needed)
 
@@ -254,13 +231,13 @@ node generate-pdf-from-html.mjs input.html output.pdf [--format=letter|a4]
 
 ## Output Files
 
-All go in `career-ops/output/`:
+All go in `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/`:
 
-- `{###}-{company}-override.json` — Resume customizations (optional, per-application)
-- `Fabricio-Pirini-{COMPANY}-Resume.pdf` — Resume PDF (e.g. `Fabricio-Pirini-Infisical-Resume.pdf`)
-- `Fabricio-Pirini-{COMPANY}-Cover-Letter.html` — Cover letter HTML (matches resume design)
-- `Fabricio-Pirini-{COMPANY}-Cover-Letter.pdf` — Cover letter PDF
-- `{###}-{company}-form-answers.md` — Application form draft answers
+- `override.json` — Resume customizations (optional, per-application)
+- `Fabricio-Pirini-Resume.pdf` — Resume PDF
+- `Fabricio-Pirini-Cover-Letter.pdf` — Cover letter PDF (optional, see Step 4)
+- `cover-letter-body.txt` — Cover letter body text (optional)
+- `form-answers.md` — Application form draft answers
 
 ## The Rule
 
