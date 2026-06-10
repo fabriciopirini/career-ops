@@ -23,6 +23,8 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { randomUUID } from 'crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CAREER_OPS_DIR = resolve(__dirname);
@@ -39,9 +41,9 @@ function log(level, message) {
 // ============================================================
 
 function importCareerData(variant = 'default') {
-  const tmp = resolve(PORTFOLIO_DIR, '.tmp-extract.cjs');
+  const tmp = resolve(tmpdir(), `.career-ops-form-${randomUUID()}.cjs`);
   const vs = JSON.stringify(variant);
-  const script = `const{CAREER}=require('./lib/career-data.ts');
+  const script = `const{CAREER}=require('${PORTFOLIO_DIR}/lib/career-data.ts');
 const d={subtitle:CAREER.subtitle[${vs}],summary:typeof CAREER.summary[${vs}]==='function'?CAREER.summary[${vs}](9):CAREER.summary[${vs}],
 skills:CAREER.skills[${vs}],
 jobs:CAREER.jobs.filter(j=>CAREER.jobOrder[${vs}]&&CAREER.jobOrder[${vs}].includes(j.id))

@@ -15,6 +15,9 @@ location_filter:
   block:
     - India
     - Bengaluru
+    - United States
+    - US
+    - USA
     - United Kingdom
     - London
     - Singapore
@@ -23,6 +26,8 @@ location_filter:
     - Remote - US
     - Remote - USA
     - Remote - United States
+    - Remote (United States)
+    - Remote (US)
     - North America
     - NAMER
     - Remote - California
@@ -43,6 +48,10 @@ title_filter:
     - Software Engineer
     - Fullstack Engineer
     - Full Stack Engineer
+    - Full-stack Engineer
+    - Fullstack Software Engineer
+    - Full Stack Software Engineer
+    - Full-stack Software Engineer
     - Frontend Engineer
     - Front-end Engineer
     - Front End Engineer
@@ -184,8 +193,12 @@ search_queries:
     query: site:himalayas.app "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" Europe
     enabled: true
   - name: HN Who's Hiring - Remote Frontend
-    query: site:news.ycombinator.com OR site:hnrss.org "Product Engineer" OR "Frontend Engineer" OR "Software Engineer" remote
+    query: site:news.ycombinator.com OR site:hnrss.org "Product Engineer" OR "Frontend Engineer" OR "Frontend" OR "Software Engineer" OR "Fullstack Engineer" OR "Full Stack Engineer" OR "Full-stack Engineer" remote
     enabled: true
+  - name: HN Who's Hiring RSS (Direct Feed)
+    query: site:hnrss.org/whoishiring/jobs "Product Engineer" OR "Frontend Engineer" OR "Frontend" OR "Software Engineer" OR "Fullstack Engineer" OR "Full Stack Engineer" OR "Full-stack Engineer"
+    enabled: true
+    notes: Dedicated RSS feed for all hiring threads. The q= param filters directly in the feed. Compare with general HN query to catch missed entries.
 tracked_companies:
   - name: Vercel
     careers_url: https://job-boards.greenhouse.io/vercel

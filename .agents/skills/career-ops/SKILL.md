@@ -74,9 +74,9 @@ Applies to: `tracker`
 For `scan` and `apply` (with Playwright): launch as Agent with the content of `_shared.md` + `modes/{mode}.md` injected into the subagent prompt.
 
 ```
-Agent(
-  subagent_type="general-purpose",
-  prompt="[content of modes/_shared.md]\n\n[content of modes/{mode}.md]\n\n[invocation-specific data]",
+subagent(
+  agent="delegate",
+  task="[content of modes/_shared.md]\n\n[content of modes/{mode}.md]\n\n[invocation-specific data]",
   description="career-ops {mode}"
 )
 ```

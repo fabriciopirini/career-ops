@@ -31,6 +31,8 @@ import { writeFileSync, statSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 import { resolve, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
+import { tmpdir } from 'os';
+import { randomUUID } from 'crypto';
 import { CONFIG, log, VALID_VARIANTS, validateVariant, DATA_FILE } from '../lib/config.mjs';
 import { compileTypst, writeDataJson, cleanupDataJson, showDataPreview, validateData, validateNoDashes } from '../lib/typst-util.mjs';
 
@@ -41,11 +43,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * Writes a temp .cjs script that tsx can import, runs it, parses JSON.
  */
 function importData(variant) {
-  const tmp = resolve(CONFIG.PORTFOLIO_DIR, '.tmp-extract.cjs');
+  const tmp = resolve(tmpdir(), `.career-ops-resume-${randomUUID()}.cjs`);
   const vs = JSON.stringify(variant);
+  const pf = CONFIG.PORTFOLIO_DIR;
 
   const scriptLines = [
-    `const { CAREER } = require('./lib/career-data.ts');`,
+    `const { CAREER } = require('${pf}/lib/career-data.ts');`,
     `const d = {`,
     `  subtitle: CAREER.subtitle[${vs}],`,
     `  summary: typeof CAREER.summary[${vs}] === 'function' ? CAREER.summary[${vs}](9) : CAREER.summary[${vs}],`,
@@ -89,7 +92,7 @@ function importData(variant) {
 function buildTypstData(data, override) {
   const subtitle = override.subtitle || data.subtitle;
   const summary = override.summary || data.summary;
-  const jobs = applyBulletOverrides(data.jobs, override.bullets);
+  const jobs = applyRoleOverrides(applyBulletOverrides(data.jobs, override.bullets), override.roles);
 
   return {
     name: 'Fabricio Tramontano Pirini',
@@ -119,6 +122,21 @@ function applyBulletOverrides(jobs, o) {
       periods: j.periods.map((p, pi) => {
         const po = jo[String(pi)];
         return po ? { ...p, bullets: [...po] } : p;
+      }),
+    };
+  });
+}
+
+function applyRoleOverrides(jobs, o) {
+  if (!o) return jobs;
+  return jobs.map(j => {
+    const jo = o[j.id];
+    if (!jo) return j;
+    return {
+      ...j,
+      periods: j.periods.map((p, pi) => {
+        const newRole = jo[String(pi)] || jo['*'];
+        return newRole ? { ...p, role: newRole } : p;
       }),
     };
   });

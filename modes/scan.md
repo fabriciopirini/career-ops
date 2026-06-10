@@ -12,7 +12,7 @@ Run as a subagent to avoid consuming main session context:
 
 ```
 Agent(
-    subagent_type="general-purpose",
+    subagent_type="delegate",
     prompt="[content of this file + specific data]",
     run_in_background=True
 )

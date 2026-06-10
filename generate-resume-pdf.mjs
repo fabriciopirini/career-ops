@@ -25,6 +25,7 @@ import { execSync } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
+import { randomUUID } from 'crypto';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORTFOLIO_DIR = resolve(__dirname, '../portfolio');
@@ -44,11 +45,11 @@ function log(l, m) {
  * Same approach as generate-resume-pdf.mjs.
  */
 function importData(variant) {
-  const tmp = resolve(PORTFOLIO_DIR, '.tmp-extract.cjs');
+  const tmp = resolve(os.tmpdir(), `.career-ops-resume-${randomUUID()}.cjs`);
   const vs = JSON.stringify(variant);
 
   const scriptLines = [
-    `const { CAREER } = require('./lib/career-data.ts');`,
+    `const { CAREER } = require('${PORTFOLIO_DIR}/lib/career-data.ts');`,
     `const d = {`,
     `  subtitle: CAREER.subtitle[${vs}],`,
     `  summary: typeof CAREER.summary[${vs}] === 'function' ? CAREER.summary[${vs}](9) : CAREER.summary[${vs}],`,
