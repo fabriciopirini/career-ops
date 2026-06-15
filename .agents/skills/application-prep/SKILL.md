@@ -28,7 +28,7 @@ Read these files:
 
 Extract from report:
 - Company name, role title
-- Archetype (determines which portfolio variant to use)
+- Archetype (determines role adaptation + portfolio variant): frontend | fullstack | product | growth
 - Customization plan (Block E)
 - Block H draft answers (3 bullets, why this company)
 
@@ -38,20 +38,39 @@ Extract from report:
 
 ```json
 {
-  "subtitle": "Senior Frontend Engineer (matching JD title)",
+  "archetype": "frontend",
+  "subtitle": "Senior Frontend Engineer",
   "summary": "Rewritten summary targeting this role...",
   "bullets": {
     "crypto-exchange": {
       "0": ["Custom bullet 1", "Custom bullet 2"]
     }
+  },
+  "roles": {
+    "crypto-exchange": { "0": "Frontend Engineer" },
+    "ecommerce-platform": { "1": "Senior Frontend Engineer" },
+    "grocery-startup": { "0": "Frontend Engineer" },
+    "sportradar": { "0": "Frontend Engineer" },
+    "samsung": { "0": "Frontend Engineering Intern" }
   }
 }
 ```
 
 Override keys:
-- **subtitle** — Match JD role title (e.g., "Senior Software Engineer" → "Full Stack Engineer")
+- **archetype** — Domain: `frontend`, `fullstack`, `product`, or `growth`. Controls role adaptation.
+- **subtitle** — Match JD role title (e.g., "Senior Software Engineer" → "Senior Frontend Engineer")
 - **summary** — Rewrite to emphasize the archetype's key framing
 - **bullets** — `{ jobId: { periodIndex: [replacement bullets] } }`. Only specify jobs/periods that need custom bullets. Everything else falls through to portfolio defaults.
+- **roles** — Per-period role title overrides: `{ jobId: { periodIndex: "New Role Title" } }`. Applied after bullets. Uses `*` key for catch-all: `{ "*": "Role" }` replaces all periods for that job.
+
+#### Role Adaptation Rules
+
+Adapt past role titles to match the target archetype. Rules:
+
+1. **Multi-period companies** — create a progression arc. Don't repeat the same adapted role twice in one company.
+2. **"Software Engineer"** (generic, single period) — keep as-is. User builds on top of it.
+3. **"Lead Software Engineer & Tech Lead"** — keep as-is for all archetypes.
+4. **"Full Stack" in title** — swap to archetype when it tells a progression story.
 
 ### Step 3 — Generate Resume PDF
 
@@ -112,7 +131,12 @@ The humanizer will catch: AI vocabulary (leveraging, pivotal, foster, etc.), for
 
 **Rule: ZERO em or en dashes.** Rewrite sentences, don't just replace characters.
 
-After humanizing, check ALL text for em dashes (`—`) and en dashes (`–`). For each one found, **rewrite the sentence** to avoid the dash construction:
+After humanizing, check ALL candidate-facing text for em dashes (`—`) and en dashes (`–`). This includes resume summary, bullets, cover letter body, **and form answers**. For each one found, **rewrite the sentence** to avoid the dash construction:
+
+**Pipeline check:** Form answers are automatically validated by `lib/typst-util.mjs` → `validateFileNoDashes()`, called by:
+- `application-form.mjs` — after writing form answers
+- `scripts/generate-all.mjs` — validates form-answers.md in output directory
+- `scripts/validate-form-answers.mjs` — standalone validation for any output dir
 
 ```
 // Wrong: mechanically replace character

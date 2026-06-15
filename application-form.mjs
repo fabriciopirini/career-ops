@@ -18,11 +18,11 @@
 
 import { chromium } from 'playwright';
 import { readFile, writeFile, mkdir } from 'fs/promises';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
-import { writeFileSync, unlinkSync } from 'fs';
+import { validateFileNoDashes } from './lib/typst-util.mjs';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
 
@@ -562,8 +562,17 @@ async function main() {
   }
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, answers, 'utf-8');
-  log('s', `Form answers stub written: ${outputPath}`);
-  log('w', 'The LLM agent must fill in the actual draft answers using the JD + career data + report.');
+  log('s', `Form answers written: ${outputPath}`);
+
+  // Validate form answers for em/en dashes
+  try {
+    validateFileNoDashes(outputPath);
+    log('s', '✅ Form answers — no dashes found');
+  } catch (err) {
+    log('e', '❌ Form answers — dashes found');
+    console.error(err.message);
+    log('w', 'Rewrite the flagged sentences and re-run validation.');
+  }
 
   // Output metadata for the agent
   const meta = {

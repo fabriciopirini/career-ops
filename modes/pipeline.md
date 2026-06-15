@@ -12,11 +12,20 @@ Process job URLs stored in `data/pipeline.md`. The user adds URLs at any time an
    d. **Execute full auto-pipeline**: Evaluation A-F → Report .md → PDF (if score >= 3.0) → Tracker
    e. **Move from "Pending" to "Processed"**: `- [x] #NNN | URL | Company | Role | Score/5 | PDF ✅/❌`
 3. **If there are 3+ pending URLs**, launch agents in parallel (Agent tool with `run_in_background`) to maximize speed.
-4. **At the end**, show summary table:
+4. **At the end**, show summary table. **The `JD` column is MANDATORY** — the user reviews by opening the posting, so every processed job MUST link to its source URL:
 
 ```
-| # | Company | Role | Score | PDF | Recommended action |
+| # | Company | Role | Score | PDF | JD | Recommended action |
+|---|---------|------|-------|-----|-----|--------------------|
+| 100 | Kilo Code | Senior Software Engineer | 3.6/5 | ❌ | [posting](https://jobs.ashbyhq.com/kilocode/79824204-...) | Apply with reason. DX/product fit... |
 ```
+
+**Rules for the summary table:**
+- **Always include a `JD` column** with a clickable markdown link to the job posting URL. No exceptions, even for low scores or SKIPs — the user needs the link to judge the call.
+- Link text: `posting` (keeps the table narrow). Do not paste raw long URLs as plain text.
+- If the source was a secondary portal (WebSearch result) rather than the ATS, link the ATS posting when known; otherwise link the verified source.
+- For private/local JDs (`local:jds/...`), link the report file instead: `[report](reports/NNN-....md)`.
+- Run the table even when only one job was processed.
 
 ## Format of pipeline.md
 

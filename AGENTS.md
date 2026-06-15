@@ -67,15 +67,14 @@ Paste JD URL or text.
 | Step | What it does |
 |------|-------------|
 | 1 | Read evaluation report + portfolio data |
-| 2 | Create `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/override.json` (subtitle, summary, per-job bullet overrides) |
-| 3 | Render resume HTML via `render-resume-html.mjs --override=...` |
-| 4 | Generate cover letter HTML matching portfolio design |
+| 2 | Create `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/override.json` (archetype, subtitle, summary, per-job bullet overrides, adapted role titles) |
+| 3 | Generate resume PDF via `scripts/generate-resume.mjs --override=...` (Typst) |
+| 4 | Generate cover letter PDF via `scripts/generate-cover.mjs` (optional, if form has field) |
 | 5 | Humanize ALL text via `/skill:humanizer` (MANDATORY) |
 | 6 | Strip ALL em dashes + normalize typography (MANDATORY) |
-| 7 | Generate resume + cover letter PDFs via Playwright |
-| 8 | Extract form fields from JD URL via `application-form.mjs` + generate per-question answers |
-| 9 | Present PDFs + form answers to user for review |
-| 10 | Update tracker: status = Applied-ready |
+| 7 | Extract form fields from JD URL via `application-form.mjs` + generate per-question answers |
+| 8 | Present PDFs + form answers to user for review |
+| 9 | Update tracker: status = Applied-ready |
 
 **NEVER submit.** User reviews, copies answers into form, clicks Submit.
 
@@ -240,6 +239,9 @@ Edit inline constants in `templates/resume.typ` to tweak:
 
 ### generate-resume.mjs temp file race condition
 Intermittent `ENOENT: no such file or directory, unlink '/home/pirini/dev/portfolio/.tmp-extract.cjs'` error. Always works on retry. The script creates and cleans up a temp file in the portfolio directory; concurrent runs may race on cleanup. Run resume generation sequentially, not in parallel, to avoid this.
+
+### Role adaptation by archetype in override.json
+New override keys: `archetype` (frontend|fullstack|product|growth) and `roles` (per-period role title overrides). LLM adapts past job titles to tell a coherent progression story for target domain. `generate-resume.mjs` already supports `override.roles` via `applyRoleOverrides()` — zero code changes needed. Rules: multi-period companies = progression arc (no repeats), "Software Engineer" (generic/single period) stays, "Lead Software Engineer & Tech Lead" stays for all archetypes. Documented in `application-prep` skill Step 2.
 
 ### merge-tracker.mjs single-entry bug
 `merge-tracker.mjs` only processes 1 entry per pipe-delimited TSV file. Multi-entry TSV files need to be split into individual files before merging. Worker subagent reported this during June 10 pipeline run.

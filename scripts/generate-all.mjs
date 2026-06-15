@@ -28,9 +28,11 @@
  */
 
 import { mkdir, readFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { log } from '../lib/config.mjs';
+import { validateFileNoDashes } from '../lib/typst-util.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -159,12 +161,26 @@ Directory structure:
     await generateCover(coverPath, body || 'Cover letter body', company, date, flags);
   }
 
+  // Validate form-answers.md if present
+  const formAnswersPath = resolve(dir, 'form-answers.md');
+  try {
+    if (existsSync(formAnswersPath)) {
+      validateFileNoDashes(formAnswersPath);
+      log.s(`✅ form-answers.md — clean`);
+    }
+  } catch (err) {
+    log.e(`❌ form-answers.md — dashes found`);
+    console.error(err.message);
+    process.exit(1);
+  }
+
   log.s('--- DONE ---');
 
   if (!dryRun && !validateOnly && !watch) {
     console.log(`\nGenerated files:`);
     console.log(`  ${resumePath}`);
     if (body) console.log(`  ${coverPath}`);
+    console.log(`  ${formAnswersPath}`);
   }
 }
 

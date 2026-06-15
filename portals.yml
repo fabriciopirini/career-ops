@@ -233,8 +233,8 @@ tracked_companies:
     careers_url: https://jobs.ashbyhq.com/resend
     scan_method: websearch
     scan_query: site:jobs.ashbyhq.com/resend "Engineer" OR "Frontend"
-    notes: Email API for developers. Remote-first.
-    enabled: true
+    notes: Email API for developers. Remote-first. Already applied.
+    enabled: false
   - name: PlanetScale
     careers_url: https://job-boards.greenhouse.io/planetscale
     api: https://boards-api.greenhouse.io/v1/boards/planetscale/jobs
@@ -291,8 +291,8 @@ tracked_companies:
     careers_url: https://jobs.ashbyhq.com/posthog
     scan_method: websearch
     scan_query: site:jobs.ashbyhq.com/posthog "Engineer" OR "Frontend"
-    notes: Open-source product analytics. Growth experimentation.
-    enabled: true
+    notes: Open-source product analytics. Growth experimentation. Already applied.
+    enabled: false
   - name: GrowthBook
     careers_url: https://jobs.ashbyhq.com/growthbook
     scan_method: websearch
@@ -361,8 +361,8 @@ tracked_companies:
   - name: Nubank
     careers_url: https://job-boards.greenhouse.io/nubank
     api: https://boards-api.greenhouse.io/v1/boards/nubank/jobs
-    notes: Brazil. Digital bank unicorn. Remote-friendly.
-    enabled: true
+    notes: Brazil. Digital bank unicorn. Hybrid required, not fully remote.
+    enabled: false
   - name: N26
     careers_url: https://job-boards.greenhouse.io/n26
     api: https://boards-api.greenhouse.io/v1/boards/n26/jobs
@@ -579,9 +579,8 @@ tracked_companies:
     notes: Prescription savings platform. From Applications.csv.
     enabled: false
   - name: Canonical
-    careers_url: https://jobs.ashbyhq.com/canonical
-    notes: Ubuntu Linux. Remote-first. From Applications.csv.
-    enabled: false
+    careers_url: https://canonical.com/careers
+    notes: Ubuntu Linux. Remote-first. Moved from Ashby to own careers page. Manual Playwright scan needed.
   - name: Center
     careers_url: https://jobs.ashbyhq.com/center
     notes: Product design platform. From Applications.csv.
@@ -1084,8 +1083,8 @@ tracked_companies:
     enabled: true
   - name: Infisical
     careers_url: https://jobs.ashbyhq.com/infisical
-    notes: Open-source secrets management.
-    enabled: true
+    notes: Open-source secrets management. Already applied.
+    enabled: false
   - name: ElevenLabs
     careers_url: https://jobs.ashbyhq.com/elevenlabs
     notes: AI voice synthesis.
