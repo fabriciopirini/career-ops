@@ -135,6 +135,7 @@ Paste JD URL or text.
 | State | When to use |
 |-------|-------------|
 | `Evaluated` | Report completed, pending decision |
+| `Applied-ready` | Application package generated, user has not submitted yet |
 | `Applied` | Application sent |
 | `Responded` | Company responded |
 | `Interview` | In interview process |
@@ -245,3 +246,12 @@ New override keys: `archetype` (frontend|fullstack|product|growth) and `roles` (
 
 ### merge-tracker.mjs single-entry bug
 `merge-tracker.mjs` only processes 1 entry per pipe-delimited TSV file. Multi-entry TSV files need to be split into individual files before merging. Worker subagent reported this during June 10 pipeline run.
+
+### Pipeline source check exists now
+`node cv-sync-check.mjs` is the canonical pre-pipeline source check. It fails only when required files are missing (`cv.md`, `config/profile.yml`, `modes/_profile.md`, `portals.yml`) and warns for optional sources (`article-digest.md`, portfolio files). Do not skip pipeline work because optional files are absent.
+
+### Tracker additions extension
+Pending tracker additions should be one pipe-delimited row in `batch/tracker-additions/{###}-{company}.tsv`. `merge-tracker.mjs` also processes legacy `.md` additions, but `.tsv` is the workflow path. Both `.tsv` and `.md` tracker additions are ignored by git to avoid committing personal pipeline data.
+
+### Automattic application gotchas
+Automattic form answers should reference the Creed when relevant, especially learning, no status quo, Open Source, and communication as distributed-company oxygen. The secret endpoint `https://public-api.wordpress.com/wpcom/v2/work-with-us` first returns a header hint; retry with `X-future: automattician` to get the secret.

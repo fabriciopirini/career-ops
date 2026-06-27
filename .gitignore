@@ -15,9 +15,11 @@ batch/logs/*
 batch/batch-state.tsv
 batch/batch-input.tsv
 batch/tracker-additions/**/*.tsv
+batch/tracker-additions/**/*.md
 !batch/tracker-additions/.gitkeep
 jds/*
 !jds/.gitkeep
+contractor-call-notes.md
 
 # Writing samples (user's personal files — never committed)
 writing-samples/*

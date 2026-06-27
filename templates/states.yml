@@ -13,6 +13,12 @@ states:
     description: Offer evaluated with report, pending decision
     dashboard_group: evaluated
 
+  - id: applied_ready
+    label: Applied-ready
+    aliases: [application-ready, ready]
+    description: Application package generated, user has not submitted yet
+    dashboard_group: evaluated
+
   - id: applied
     label: Applied
     aliases: [aplicado, enviada, aplicada, sent]

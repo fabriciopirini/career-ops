@@ -181,8 +181,10 @@ node application-form.mjs <jd-url> --report reports/{###}-{company}-{date}.md --
 
 The script outputs a JSON object with extracted form fields. The LLM then:
 1. For each extracted question, generate a tailored answer using career data + evaluation report
-2. Write humanized, em-dash-free answers into `output/{###}-{company}-form-answers.md`
-3. Present them for the user to review
+2. Read any company-specific public references linked by the form (creed, values, API instructions, compensation philosophy) and weave them into answers where natural
+3. If an instruction endpoint returns a hint like `Expected 'X-future' header with value 'automattician'`, retry with that exact header instead of treating it as failed
+4. Write humanized, em-dash-free answers into `output/{company-slug}/{YYYY-MM-DD}-{role-slug}/form-answers.md`
+5. Present them for the user to review
 
 **If the form extraction fails** (non-standard ATS, login wall, complex multi-page form), fall back to a generic question set:
 - Cover Letter / Why are you interested?

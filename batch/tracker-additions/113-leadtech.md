@@ -1,1 +1,0 @@
-| 113 | 2026-06-18 | Leadtech (MAU) | Senior Product Engineer | 2.5/5 | Discarded | ❌ | [113](reports/113-leadtech-2026-06-18.md) | Python fluency mandatory + AI-native agentic core. Fundamental mismatch. |

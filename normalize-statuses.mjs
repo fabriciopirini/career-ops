@@ -66,7 +66,7 @@ function normalizeStatus(raw) {
 
   // Already canonical (English, per states.yml) — just fix casing/bold
   const canonical = [
-    'Evaluated', 'Applied', 'Responded', 'Interview',
+    'Evaluated', 'Applied-ready', 'Applied', 'Responded', 'Interview',
     'Offer', 'Rejected', 'Discarded', 'SKIP',
   ];
   for (const c of canonical) {
@@ -75,6 +75,7 @@ function normalizeStatus(raw) {
 
   // Spanish aliases → English canonicals
   if (['evaluada'].includes(lower)) return { status: 'Evaluated' };
+  if (['applied-ready', 'application-ready', 'ready'].includes(lower)) return { status: 'Applied-ready' };
   if (['aplicado', 'enviada', 'aplicada', 'applied', 'sent'].includes(lower)) return { status: 'Applied' };
   if (['respondido'].includes(lower)) return { status: 'Responded' };
   if (['entrevista'].includes(lower)) return { status: 'Interview' };

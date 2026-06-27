@@ -63,4 +63,20 @@ Before processing any URL, verify sync:
 ```bash
 node cv-sync-check.mjs
 ```
-If there is a desynchronization, warn the user before continuing.
+If the script reports missing required files, stop and fix onboarding first. If it reports warnings only, mention them and continue.
+
+## Tracker additions
+
+Write tracker additions as `batch/tracker-additions/{###}-{company}.tsv`.
+
+Accepted content is one pipe-delimited markdown row:
+```markdown
+| 137 | 2026-06-27 | Company | Role | 4.1/5 | Evaluated | ❌ | [137](reports/137-company-2026-06-27.md) | Notes |
+```
+
+Then run:
+```bash
+node merge-tracker.mjs
+```
+
+Do not use `.md` for pending additions. `merge-tracker.mjs` accepts old `.md` files only as a compatibility fallback and moves processed files to `batch/tracker-additions/merged/`.

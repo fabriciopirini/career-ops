@@ -32,13 +32,16 @@ Read `config/profile.yml`. Check `cv.output_format`:
 - If `"latex"`, execute the full pipeline from `modes/latex.md`
 - Otherwise (default), execute the full pipeline from `modes/pdf.md`
 
-## Step 4 — Draft Application Answers (only if score >= 4.5)
+## Step 4 — Draft Application Answers
 
-If the final score is >= 4.5, generate a draft of responses for the application form:
+Always add `## H) Draft Application Answers` to the report, regardless of score. Low-fit roles still need pre-drafts for review, skip reasoning, or later reconsideration.
+
+For application-ready packages, extract the actual form questions and answer those exact fields. Otherwise generate generic pre-drafts:
 
 1. **Extract form questions**: Use Playwright to navigate to the form and take a snapshot. If they cannot be extracted, use the generic questions.
-2. **Generate responses** following the tone (see below).
-3. **Save in the report** as section `## H) Draft Application Answers`.
+2. **Check company-specific public instructions**: If the form links to a creed, values page, API endpoint, or written instructions, read them and reference them in the answers where natural.
+3. **Generate responses** following the tone below.
+4. **Save in the report** as section `## H) Draft Application Answers`.
 
 ### Generic questions (use if they cannot be extracted from the form)
 
@@ -67,6 +70,8 @@ If the final score is >= 4.5, generate a draft of responses for the application 
 - **How did you hear?** → Honest: "Found through [portal/scan], evaluated against my criteria, and it scored highest."
 
 **Language**: Always in the language of the JD (EN default). Apply `/tech-translate`.
+
+**Instruction URLs:** If an instruction URL returns a hint like `Expected 'X-future' header with value 'automattician'`, retry the request with that exact header before marking it failed.
 
 ## Step 5 — Update Tracker
 

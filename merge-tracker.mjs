@@ -34,7 +34,7 @@ mkdirSync(join(CAREER_OPS, 'data'), { recursive: true });
 mkdirSync(ADDITIONS_DIR, { recursive: true });
 
 // Canonical states and aliases
-const CANONICAL_STATES = ['Evaluated', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
+const CANONICAL_STATES = ['Evaluated', 'Applied-ready', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP'];
 
 function validateStatus(status) {
   const clean = status.replace(/\*\*/g, '').replace(/\s+\d{4}-\d{2}-\d{2}.*$/, '').trim();
@@ -48,6 +48,7 @@ function validateStatus(status) {
   const aliases = {
     // Spanish → English
     'evaluada': 'Evaluated', 'condicional': 'Evaluated', 'hold': 'Evaluated', 'evaluar': 'Evaluated', 'verificar': 'Evaluated',
+    'applied-ready': 'Applied-ready', 'application-ready': 'Applied-ready', 'ready': 'Applied-ready',
     'aplicado': 'Applied', 'enviada': 'Applied', 'aplicada': 'Applied', 'applied': 'Applied', 'sent': 'Applied',
     'respondido': 'Responded',
     'entrevista': 'Interview',
@@ -285,27 +286,32 @@ if (!existsSync(ADDITIONS_DIR)) {
   process.exit(0);
 }
 
-const tsvFiles = readdirSync(ADDITIONS_DIR).filter(f => f.endsWith('.tsv'));
-if (tsvFiles.length === 0) {
+const additionFiles = readdirSync(ADDITIONS_DIR).filter(f => f.endsWith('.tsv') || f.endsWith('.md'));
+if (additionFiles.length === 0) {
   console.log('✅ No pending additions to merge.');
   process.exit(0);
 }
 
 // Sort files numerically for deterministic processing
-tsvFiles.sort((a, b) => {
+additionFiles.sort((a, b) => {
   const numA = parseInt(a.replace(/\D/g, '')) || 0;
   const numB = parseInt(b.replace(/\D/g, '')) || 0;
   return numA - numB;
 });
 
-console.log(`📥 Found ${tsvFiles.length} pending additions`);
+const legacyMd = additionFiles.filter(f => f.endsWith('.md'));
+if (legacyMd.length > 0) {
+  console.warn(`⚠️  Found ${legacyMd.length} legacy .md tracker addition(s); prefer .tsv. Processing for compatibility.`);
+}
+
+console.log(`📥 Found ${additionFiles.length} pending additions`);
 
 let added = 0;
 let updated = 0;
 let skipped = 0;
 const newLines = [];
 
-for (const file of tsvFiles) {
+for (const file of additionFiles) {
   const content = readFileSync(join(ADDITIONS_DIR, file), 'utf-8').trim();
   const addition = parseTsvContent(content, file);
   if (!addition) { skipped++; continue; }
@@ -387,10 +393,10 @@ if (!DRY_RUN) {
 
   // Move processed files to merged/
   if (!existsSync(MERGED_DIR)) mkdirSync(MERGED_DIR, { recursive: true });
-  for (const file of tsvFiles) {
+  for (const file of additionFiles) {
     renameSync(join(ADDITIONS_DIR, file), join(MERGED_DIR, file));
   }
-  console.log(`\n✅ Moved ${tsvFiles.length} TSVs to merged/`);
+  console.log(`\n✅ Moved ${additionFiles.length} tracker addition file(s) to merged/`);
 }
 
 console.log(`\n📊 Summary: +${added} added, 🔄${updated} updated, ⏭️${skipped} skipped`);
