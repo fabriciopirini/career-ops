@@ -18,7 +18,8 @@ Determine the mode from `$mode`:
 | (empty / no args) | `discovery` -- Show command menu |
 | JD text or URL (no sub-command) | **`auto-pipeline`** |
 | `eval` or `oferta` | `oferta` |
-| `scan` | `scan` |
+| `scan` | `scan` (full scan: `scan.mjs` + Level 3 WebSearch + liveness verify) |
+| `scan quick` | `scan` (quick scan: `scan.mjs` only, skip Level 3) |
 | `apply` | `apply` |
 | `tracker` | `tracker` |
 | `pipeline` | `pipeline` |
@@ -40,7 +41,8 @@ career-ops -- Command Center
 
 Available commands:
   /career-ops {JD}        → AUTO-PIPELINE: evaluate + form answers + package (paste text or URL)
-  /career-ops scan         → Scan portals and discover new offers
+  /career-ops scan         → Full scan: providers + WebSearch Level 3 + liveness verify
+  /career-ops scan quick   → Quick provider/API scan only
   /career-ops pipeline     → Process pending URLs from inbox (data/pipeline.md)
   /career-ops eval         → Evaluate a single offer (A-G report)
   /career-ops apply        → Application form assistant (Playwright extracts form + generates answers)
@@ -72,6 +74,8 @@ Applies to: `tracker`
 
 ### Modes delegated to subagent:
 For `scan` and `apply` (with Playwright): launch as Agent with the content of `_shared.md` + `modes/{mode}.md` injected into the subagent prompt.
+
+**Scan default:** `/career-ops scan` MUST run the full flow. First execute `node scan.mjs`, then run Level 3 WebSearch for every enabled `search_queries` entry in `portals.yml`, dedupe against `scan-history.tsv`, `applications.md`, and `pipeline.md`, verify new Level 3 hits with Playwright sequentially, then write `pipeline.md` and `scan-history.tsv`. Only skip Level 3 when the user explicitly invokes `scan quick` or says quick/provider-only scan.
 
 ```
 subagent(

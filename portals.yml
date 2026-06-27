@@ -90,7 +90,7 @@ title_filter:
     - Quality Engineer
     - SDET
     - .NET
-    - 'Java '
+    - "Java "
     - iOS
     - Android
     - PHP
@@ -241,8 +241,8 @@ tracked_companies:
     notes: Serverless MySQL platform.
     enabled: true
   - name: Temporal
-    careers_url: https://job-boards.greenhouse.io/temporal
-    api: https://boards-api.greenhouse.io/v1/boards/temporal/jobs
+    careers_url: https://job-boards.greenhouse.io/temporaltechnologies
+    api: https://boards-api.greenhouse.io/v1/boards/temporaltechnologies/jobs
     notes: Workflow orchestration.
     enabled: true
   - name: Prisma
@@ -396,13 +396,13 @@ tracked_companies:
   - name: Payward (Kraken)
     careers_url: https://job-boards.greenhouse.io/kraken
     api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
-    notes: Crypto exchange. Remote-friendly, strong frontend org. Current employer.
-    enabled: false
+    notes: Crypto exchange. Remote-friendly, strong frontend org. Previous employer.
+    enabled: true
   - name: Coinbase
     careers_url: https://job-boards.greenhouse.io/coinbase
     api: https://boards-api.greenhouse.io/v1/boards/coinbase/jobs
     notes: US crypto exchange. Remote-friendly, strong frontend org.
-    enabled: false
+    enabled: true
   - name: Kraken
     careers_url: https://job-boards.greenhouse.io/kraken
     api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
@@ -600,7 +600,7 @@ tracked_companies:
   - name: Clipboard Health
     careers_url: https://www.clipboardworks.com/careers
     notes: Healthcare staffing marketplace. Remote-first. From Applications.csv. Uses Ashby.
-    enabled: true
+    enabled: false
   - name: Cloudflare
     careers_url: https://jobs.ashbyhq.com/cloudflare
     notes: CDN, DDoS protection, edge computing. From Applications.csv.
