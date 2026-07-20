@@ -1,0 +1,5 @@
+{
+  "fixtureVersion": "1.0.0",
+  "rowCounts": {"small": 250, "medium": 1000, "large": 5000},
+  "failureFixtures": ["malformed", "duplicates", "statusConflict"]
+}

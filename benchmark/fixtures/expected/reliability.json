@@ -1,0 +1,15 @@
+{
+  "fixtureVersion": "1.0.0",
+  "checks": [
+    {"id":"same-title-distinct-url","expected":"retain-both"},
+    {"id":"invalid-record-sibling-isolation","expected":"reject-invalid-retain-valid"},
+    {"id":"url-variant-canonicalization","expected":"one-canonical-identity"},
+    {"id":"uncertain-liveness","expected":"retryable-not-blacklisted"},
+    {"id":"concurrent-writers","expected":"no-overwrite-or-duplicate"},
+    {"id":"parallel-reserved-ids","expected":"unique-reserved-ids"},
+    {"id":"same-batch-reconciliation","expected":"later-sees-earlier"},
+    {"id":"malformed-addition","expected":"pending-not-archived"},
+    {"id":"tracker-failure-injection","expected":"unchanged-or-recoverable"},
+    {"id":"dedup-provenance","expected":"notes-reports-pdf-status-preserved"}
+  ]
+}

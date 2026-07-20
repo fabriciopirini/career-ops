@@ -1,0 +1,19 @@
+{
+  "fixtureVersion": "1.0.0",
+  "documents": {
+    "small": "tracker-small.md",
+    "medium": "tracker-medium.md",
+    "large": "tracker-large.md",
+    "malformed": "tracker-malformed.md",
+    "duplicates": "tracker-duplicates.md",
+    "statusConflict": "tracker-status-conflict.md"
+  },
+  "expected": {
+    "small": {"rows": 250, "valid": true, "errors": []},
+    "medium": {"rows": 1000, "valid": true, "errors": []},
+    "large": {"rows": 5000, "valid": true, "errors": []},
+    "malformed": {"rows": 1, "valid": false, "errors": [{"line":4,"code":"field_count"}]},
+    "duplicates": {"rows": 2, "valid": false, "errors": [{"line":4,"code":"duplicate_id"}]},
+    "statusConflict": {"rows": 2, "valid": false, "errors": [{"line":4,"code":"unknown_status"}]}
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "fixtureVersion": "1.0.0",
+  "acceptedIds": ["same-title-b", "design-system", "empty-location"],
+  "rejectedCodes": {"control-title":"no_apply_control"},
+  "workProxy": {"agentTasks":3,"webSearchQueries":2,"toolCalls":5}
+}

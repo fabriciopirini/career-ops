@@ -1,0 +1,52 @@
+{
+  "fixtureVersion": "1.0.0",
+  "candidates": [
+    {"id":"query-a-1","url":"https://jobs.synthetic.test/atlas/frontend-b","query":"frontend remote"},
+    {"id":"query-a-1-duplicate","url":"https://jobs.synthetic.test/atlas/frontend-b?utm_source=search","query":"frontend americas"},
+    {"id":"parser-api-overlap","url":"https://jobs.synthetic.test/bright/design-system/","query":"design systems"},
+    {"id":"location-variant","url":"https://jobs.synthetic.test/ion/frontend","query":"frontend brazil"},
+    {"id":"already-seen","url":"https://jobs.synthetic.test/acme/frontend?ref=history","query":"frontend remote"},
+    {"id":"unsupported-provider","url":"https://jobs.synthetic.test/providerless/unknown","query":"frontend remote","provider":"unsupported"}
+  ],
+  "seenUrls": [
+    "https://jobs.synthetic.test/acme/frontend/",
+    "https://jobs.synthetic.test/atlas/frontend-a?utm_source=old",
+    "https://jobs.synthetic.test/cascade/devex?ref=history"
+  ],
+  "seenCompanyRoles": ["acme synthetic::senior frontend engineer"],
+  "liveness": [
+    {"url":"https://jobs.synthetic.test/atlas/frontend-b","livenessCase":"active-apply"},
+    {"url":"https://jobs.synthetic.test/bright/design-system","livenessCase":"iframe-control"},
+    {"url":"https://jobs.synthetic.test/ion/frontend","livenessCase":"localized-apply"},
+    {"url":"https://jobs.synthetic.test/nova/control","livenessCase":"no-apply"}
+  ],
+  "expected": {
+    "dedup": {
+      "accepted": [
+        {"id":"same-title-b","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/atlas/frontend-b","company":"Atlas Synthetic","location":"Americas"},
+        {"id":"design-system","title":"Design System Engineer","url":"https://jobs.synthetic.test/bright/design-system","company":"Bright Synthetic","location":"Remote, Europe"},
+        {"id":"empty-location","title":"Frontend Engineer","url":"https://jobs.synthetic.test/ion/frontend","company":"Ion Synthetic","location":""}
+      ],
+      "duplicates": [
+        {"id":"valid-frontend","code":"already_seen","canonicalUrl":"https://jobs.synthetic.test/acme/frontend"},
+        {"id":"same-title-a","code":"already_seen","canonicalUrl":"https://jobs.synthetic.test/atlas/frontend-a"},
+        {"id":"devex","code":"already_seen","canonicalUrl":"https://jobs.synthetic.test/cascade/devex"}
+      ]
+    },
+    "pipeline": {
+      "accepted": ["same-title-b","design-system","empty-location"],
+      "rejected": []
+    },
+    "workProxy": {
+      "agentTasks": 3,
+      "webSearchQueries": 2,
+      "toolCalls": 5,
+      "sourceRecords": 6,
+      "acceptedRecords": 3,
+      "duplicateDrops": 3,
+      "livenessCalls": 3,
+      "evaluationCandidates": 3,
+      "manifestChars": 0
+    }
+  }
+}

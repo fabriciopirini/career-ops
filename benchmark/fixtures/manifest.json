@@ -1,0 +1,21 @@
+{
+  "fixtureVersion": "1.0.0",
+  "syntheticOnly": true,
+  "network": "none",
+  "files": [
+    "provider-jobs.json",
+    "liveness-cases.json",
+    "tracker-small.md",
+    "tracker-medium.md",
+    "tracker-large.md",
+    "tracker-malformed.md",
+    "tracker-duplicates.md",
+    "tracker-status-conflict.md",
+    "pipeline-candidates.json",
+    "expected/provider.json",
+    "expected/liveness.json",
+    "expected/tracker.json",
+    "expected/pipeline.json",
+    "expected/reliability.json"
+  ]
+}

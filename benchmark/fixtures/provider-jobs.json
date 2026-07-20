@@ -1,0 +1,54 @@
+{
+  "fixtureVersion": "1.0.0",
+  "config": {
+    "titleFilter": {
+      "positive": ["frontend", "design system", "developer experience"],
+      "negative": ["intern", "sales"]
+    },
+    "locationFilter": {
+      "allow": ["remote", "brazil", "americas"],
+      "block": ["onsite", "europe"],
+      "alwaysAllow": ["remote"]
+    }
+  },
+  "records": [
+    {"id":"valid-frontend","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/acme/frontend?utm_source=fixture#role","company":"Acme Synthetic","location":"Remote"},
+    {"id":"same-title-a","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/atlas/frontend-a","company":"Atlas Synthetic","location":"Brazil"},
+    {"id":"same-title-b","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/atlas/frontend-b","company":"Atlas Synthetic","location":"Americas"},
+    {"id":"design-system","title":"Design System Engineer","url":"https://jobs.synthetic.test/bright/design-system/","company":"Bright Synthetic","location":"Remote, Europe"},
+    {"id":"devex","title":"Developer Experience Engineer","url":"https://jobs.synthetic.test/cascade/devex","company":"Cascade Synthetic","location":"Remote"},
+    {"id":"intern","title":"Frontend Intern","url":"https://jobs.synthetic.test/delta/intern","company":"Delta Synthetic","location":"Remote"},
+    {"id":"sales","title":"Frontend Sales Specialist","url":"https://jobs.synthetic.test/echo/sales","company":"Echo Synthetic","location":"Remote"},
+    {"id":"wrong-title","title":"Product Manager","url":"https://jobs.synthetic.test/foxtrot/product","company":"Foxtrot Synthetic","location":"Remote"},
+    {"id":"blocked-location","title":"Frontend Engineer","url":"https://jobs.synthetic.test/gamma/frontend","company":"Gamma Synthetic","location":"Onsite, Europe"},
+    {"id":"not-allowed","title":"Frontend Engineer","url":"https://jobs.synthetic.test/helium/frontend","company":"Helium Synthetic","location":"Tokyo"},
+    {"id":"empty-location","title":"Frontend Engineer","url":"https://jobs.synthetic.test/ion/frontend","company":"Ion Synthetic","location":""},
+    {"id":"missing-title","title":"","url":"https://jobs.synthetic.test/jade/missing-title","company":"Jade Synthetic","location":"Remote"},
+    {"id":"missing-url","title":"Frontend Engineer","url":"","company":"Kite Synthetic","location":"Remote"},
+    {"id":"non-http","title":"Frontend Engineer","url":"ftp://jobs.synthetic.test/lima/non-http","company":"Lima Synthetic","location":"Remote"},
+    {"id":"invalid-url","title":"Frontend Engineer","url":"not a url","company":"Mica Synthetic","location":"Remote"},
+    {"id":"control-title","title":"Frontend\u0007 Engineer","url":"https://jobs.synthetic.test/nova/control","company":"Nova Synthetic","location":"Remote"}
+  ],
+  "expected": {
+    "accepted": [
+      {"id":"valid-frontend","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/acme/frontend","company":"Acme Synthetic","location":"Remote"},
+      {"id":"same-title-a","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/atlas/frontend-a","company":"Atlas Synthetic","location":"Brazil"},
+      {"id":"same-title-b","title":"Senior Frontend Engineer","url":"https://jobs.synthetic.test/atlas/frontend-b","company":"Atlas Synthetic","location":"Americas"},
+      {"id":"design-system","title":"Design System Engineer","url":"https://jobs.synthetic.test/bright/design-system","company":"Bright Synthetic","location":"Remote, Europe"},
+      {"id":"devex","title":"Developer Experience Engineer","url":"https://jobs.synthetic.test/cascade/devex","company":"Cascade Synthetic","location":"Remote"},
+      {"id":"empty-location","title":"Frontend Engineer","url":"https://jobs.synthetic.test/ion/frontend","company":"Ion Synthetic","location":""}
+    ],
+    "rejected": [
+      {"id":"intern","code":"title_filter_negative"},
+      {"id":"sales","code":"title_filter_negative"},
+      {"id":"wrong-title","code":"title_filter"},
+      {"id":"blocked-location","code":"location_block"},
+      {"id":"not-allowed","code":"location_allow"},
+      {"id":"missing-title","code":"missing_title"},
+      {"id":"missing-url","code":"missing_url"},
+      {"id":"non-http","code":"unsupported_url"},
+      {"id":"invalid-url","code":"unsupported_url"},
+      {"id":"control-title","code":"invalid_field"}
+    ]
+  }
+}

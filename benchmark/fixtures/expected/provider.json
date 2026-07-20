@@ -1,0 +1,5 @@
+{
+  "fixtureVersion": "1.0.0",
+  "acceptedIds": ["valid-frontend", "same-title-a", "same-title-b", "design-system", "devex", "empty-location"],
+  "rejectedCodes": {"intern":"title_filter_negative","sales":"title_filter_negative","wrong-title":"title_filter","blocked-location":"location_block","not-allowed":"location_allow","missing-title":"missing_title","missing-url":"missing_url","non-http":"unsupported_url","invalid-url":"unsupported_url","control-title":"invalid_field"}
+}

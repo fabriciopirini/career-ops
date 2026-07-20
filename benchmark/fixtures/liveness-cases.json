@@ -1,0 +1,25 @@
+{
+  "fixtureVersion": "1.0.0",
+  "cases": [
+    {"id":"active-apply","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/active","bodyText":"Synthetic role details with responsibilities and requirements. This fixture contains enough text to represent a complete posting without any personal data. The team builds deterministic tools and documents clear hiring expectations for every candidate. Each synthetic paragraph adds enough context to model a complete posting, including scope, collaboration, accessibility, testing, and release responsibilities for the role.\n","applyControls":["Apply now"]}},
+    {"id":"http-404","input":{"status":404,"finalUrl":"https://jobs.synthetic.test/live/missing","bodyText":"","applyControls":[]}},
+    {"id":"closed-body","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/closed","bodyText":"This job is no longer available. Synthetic archive page.","applyControls":["Read more"]}},
+    {"id":"short-content","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/short","bodyText":"Role","applyControls":[]}},
+    {"id":"no-apply","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/no-apply","bodyText":"Synthetic role details with responsibilities and requirements. This fixture contains enough text to represent a complete posting without any personal data. The team builds deterministic tools and documents clear hiring expectations for every candidate. Each synthetic paragraph adds enough context to model a complete posting, including scope, collaboration, accessibility, testing, and release responsibilities for the role.\n","applyControls":[]}},
+    {"id":"iframe-control","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/iframe","bodyText":"Synthetic role details with responsibilities and requirements. This fixture contains enough text to represent a complete posting without any personal data. The team builds deterministic tools and documents clear hiring expectations for every candidate. Each synthetic paragraph adds enough context to model a complete posting, including scope, collaboration, accessibility, testing, and release responsibilities for the role.\n","applyControls":["Apply"]}},
+    {"id":"navigation-timeout","input":{"errorCode":"navigation_timeout","errorMessage":"synthetic timeout"}},
+    {"id":"localized-apply","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/localized","bodyText":"Synthetic role details with responsibilities and requirements. This fixture contains enough text to represent a complete posting without any personal data. The team builds deterministic tools and documents clear hiring expectations for every candidate. Each synthetic paragraph adds enough context to model a complete posting, including scope, collaboration, accessibility, testing, and release responsibilities for the role.\n","applyControls":["Solicitar"]}},
+    {"id":"expired-url","input":{"status":200,"finalUrl":"https://jobs.synthetic.test/live/redirect?error=true","bodyText":"Synthetic role details with responsibilities and requirements. This fixture contains enough text to represent a complete posting without any personal data. The team builds deterministic tools and documents clear hiring expectations for every candidate. Each synthetic paragraph adds enough context to model a complete posting, including scope, collaboration, accessibility, testing, and release responsibilities for the role.\n","applyControls":[]}}
+  ],
+  "expected": [
+    {"id":"active-apply","result":"active","code":"apply_control_visible","reason":"visible apply control detected"},
+    {"id":"http-404","result":"expired","code":"http_gone","reason":"HTTP 404"},
+    {"id":"closed-body","result":"expired","code":"expired_body","reason":"pattern matched: job (is )?no longer available"},
+    {"id":"short-content","result":"expired","code":"insufficient_content","reason":"insufficient content — likely nav/footer only"},
+    {"id":"no-apply","result":"uncertain","code":"no_apply_control","reason":"content present but no visible apply control found"},
+    {"id":"iframe-control","result":"active","code":"apply_control_visible","reason":"visible apply control detected"},
+    {"id":"navigation-timeout","result":"uncertain","code":"navigation_error","reason":"synthetic timeout"},
+    {"id":"localized-apply","result":"active","code":"apply_control_visible","reason":"visible apply control detected"},
+    {"id":"expired-url","result":"expired","code":"expired_url","reason":"redirect to https://jobs.synthetic.test/live/redirect?error=true"}
+  ]
+}

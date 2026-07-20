@@ -1,0 +1,5 @@
+{
+  "fixtureVersion": "1.0.0",
+  "resultCounts": {"active": 3, "expired": 4, "uncertain": 2},
+  "expectedErrorCodes": ["apply_control_visible","http_gone","expired_body","insufficient_content","no_apply_control","apply_control_visible","navigation_error","apply_control_visible","expired_url"]
+}
