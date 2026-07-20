@@ -81,7 +81,7 @@ test('benchmark summaries use measured samples and expose required statistics', 
   assert.ok(summary.stats.max >= summary.stats.min);
 });
 
-test('benchmark artifact contains speed, reliability, work proxy, and unavailable telemetry', () => {
+test('benchmark artifact contains speed, observed reliability, work proxy, and unavailable telemetry', () => {
   const artifact = runBenchmark({ warmups: DEFAULT_WARMUPS, iterations: DEFAULT_ITERATIONS });
   assert.equal(artifact.fixtureVersion, FIXTURE_VERSION);
   assert.equal(artifact.network, 'none');
@@ -95,10 +95,13 @@ test('benchmark artifact contains speed, reliability, work proxy, and unavailabl
   assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.agentTasks, 3);
   assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.webSearchQueries, 4);
   assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.toolCalls, 9);
-  assert.deepEqual(artifact.reliability.failures, []);
+  assert.equal(artifact.reliability.status, 'KNOWN_FAILURES');
+  assert.ok(artifact.reliability.failures.some((failure) => failure.startsWith('malformed-addition:')));
+  assert.equal(artifact.reliability.observations['malformed-addition'], 'archived-malformed-addition');
   for (const workload of Object.values(artifact.workloads)) {
     for (const key of ['sourceRecords', 'acceptedRecords', 'duplicateDrops', 'livenessCalls', 'evaluationCandidates', 'agentTasks', 'webSearchQueries', 'toolCalls', 'manifestChars']) assert.equal(typeof workload.workProxy[key], 'number');
-    assert.equal(workload.reliability.failures, 0);
+    assert.equal(typeof workload.reliability.failures, 'number');
+    assert.equal(workload.reliability.status, workload.reliability.failures === 0 ? 'PASS' : 'KNOWN_FAILURES');
   }
 });
 

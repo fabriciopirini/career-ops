@@ -1,6 +1,6 @@
 const STATUSES = new Set(['Evaluated', 'Applied-ready', 'Applied', 'Responded', 'Interview', 'Offer', 'Rejected', 'Discarded', 'SKIP']);
 
-export function trackerTransform(text) {
+export function parseTrackerRows(text) {
   const rows = [];
   const errors = [];
   for (const [index, line] of text.split(/\r?\n/).entries()) {
@@ -12,22 +12,27 @@ export function trackerTransform(text) {
     }
     const number = Number(fields[0]);
     if (!Number.isInteger(number) || number <= 0) errors.push({ line: index + 1, code: 'invalid_id' });
-    rows.push({ line: index + 1, number, fields });
+    rows.push({ line: index + 1, number, fields, raw: line });
   }
+  return { rows, errors };
+}
+
+export function trackerTransform(text) {
+  const parsed = parseTrackerRows(text);
   const ids = new Set();
-  for (const row of rows) {
-    if (ids.has(row.number)) errors.push({ line: row.line, code: 'duplicate_id' });
+  for (const row of parsed.rows) {
+    if (ids.has(row.number)) parsed.errors.push({ line: row.line, code: 'duplicate_id' });
     ids.add(row.number);
   }
-  for (const row of rows) {
-    if (!STATUSES.has(row.fields[5])) errors.push({ line: row.line, code: 'unknown_status' });
+  for (const row of parsed.rows) {
+    if (!STATUSES.has(row.fields[5])) parsed.errors.push({ line: row.line, code: 'unknown_status' });
   }
   return {
-    rows: rows.length,
-    errors,
-    valid: errors.length === 0,
+    rows: parsed.rows.length,
+    errors: parsed.errors,
+    valid: parsed.errors.length === 0,
     uniqueIds: ids.size,
-    statusCounts: Object.fromEntries([...STATUSES].map((status) => [status, rows.filter((row) => row.fields[5] === status).length])),
+    statusCounts: Object.fromEntries([...STATUSES].map((status) => [status, parsed.rows.filter((row) => row.fields[5] === status).length])),
   };
 }
 

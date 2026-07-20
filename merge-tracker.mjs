@@ -18,6 +18,7 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, renameSync, exists
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execFileSync } from 'child_process';
+import { parseTrackerRows } from './tracker-core.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -268,13 +269,11 @@ const appLines = appContent.split('\n');
 const existingApps = [];
 let maxNum = 0;
 
-for (const line of appLines) {
-  if (line.startsWith('|') && !line.includes('---') && !line.includes('Empresa')) {
-    const app = parseAppLine(line);
-    if (app) {
-      existingApps.push(app);
-      if (app.num > maxNum) maxNum = app.num;
-    }
+for (const row of parseTrackerRows(appContent).rows) {
+  const app = parseAppLine(row.raw);
+  if (app) {
+    existingApps.push(app);
+    if (app.num > maxNum) maxNum = app.num;
   }
 }
 

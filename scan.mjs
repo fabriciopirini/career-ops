@@ -34,6 +34,7 @@ import yaml from 'js-yaml';
 
 import { makeHttpCtx } from './providers/_http.mjs';
 import { reconcileProviderJobs } from './scan-core.mjs';
+import { commitText } from './persistence-core.mjs';
 
 const parseYaml = yaml.load;
 
@@ -228,7 +229,8 @@ function loadSeenCompanyRoles() {
 function appendToPipeline(offers) {
   if (offers.length === 0) return;
 
-  let text = readFileSync(PIPELINE_PATH, 'utf-8');
+  const originalText = readFileSync(PIPELINE_PATH, 'utf-8');
+  let text = originalText;
 
   // Find "## Pendientes" section and append after it
   const marker = '## Pendientes';
@@ -253,7 +255,13 @@ function appendToPipeline(offers) {
     text = text.slice(0, insertAt) + block + text.slice(insertAt);
   }
 
-  writeFileSync(PIPELINE_PATH, text, 'utf-8');
+  const commit = commitText({
+    read: () => readFileSync(PIPELINE_PATH, 'utf-8'),
+    write: (next) => writeFileSync(PIPELINE_PATH, next, 'utf-8'),
+    expected: originalText,
+    next: text,
+  });
+  if (commit.status !== 'committed') throw new Error(`pipeline commit ${commit.status}`);
 }
 
 function appendToScanHistory(offers, date, status = 'added') {
@@ -297,9 +305,10 @@ async function verifyOffers(offers) {
   // Dynamic imports keep the default zero-token path free of Playwright startup
   let chromium;
   let checkUrlLiveness;
+  let createLivenessRoutingState;
   try {
     ({ chromium } = await import('playwright'));
-    ({ checkUrlLiveness } = await import('./liveness-browser.mjs'));
+    ({ checkUrlLiveness, createLivenessRoutingState } = await import('./liveness-browser.mjs'));
   } catch (err) {
     throw new Error(
       `--verify requires Playwright with Chromium (run "npx playwright install chromium"): ${err.message}`,
@@ -328,12 +337,13 @@ async function verifyOffers(offers) {
   const expired = [];
   const dropped = [];
   const invalid = [];
+  const routingState = createLivenessRoutingState();
 
   try {
     const page = await browser.newPage();
     // Sequential — project rule: never Playwright in parallel
     for (const offer of offers) {
-      const { result, code, reason } = await checkUrlLiveness(page, offer.url);
+      const { result, code, reason } = await checkUrlLiveness(page, offer.url, { routingState });
       if (result === 'expired') {
         expired.push({ ...offer, reason });
         console.log(`  ❌ expired   ${offer.company} | ${offer.title} (${reason})`);

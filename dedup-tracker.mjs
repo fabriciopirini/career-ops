@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { parseTrackerRows } from './tracker-core.mjs';
 
 const CAREER_OPS = dirname(fileURLToPath(import.meta.url));
 // Support both layouts: data/applications.md (boilerplate) and applications.md (original)
@@ -131,12 +132,11 @@ const lines = content.split('\n');
 const entries = [];
 const entryLineMap = new Map(); // num → line index
 
-for (let i = 0; i < lines.length; i++) {
-  if (!lines[i].startsWith('|')) continue;
-  const app = parseAppLine(lines[i]);
+for (const row of parseTrackerRows(content).rows) {
+  const app = parseAppLine(row.raw);
   if (app && app.num > 0) {
     entries.push(app);
-    entryLineMap.set(app.num, i);
+    entryLineMap.set(app.num, row.line - 1);
   }
 }
 
