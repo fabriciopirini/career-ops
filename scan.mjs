@@ -33,6 +33,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 
 import { makeHttpCtx } from './providers/_http.mjs';
+import { reconcileProviderJobs } from './scan-core.mjs';
 
 const parseYaml = yaml.load;
 
@@ -457,31 +458,18 @@ async function main() {
       if (!Array.isArray(jobs)) {
         throw new Error(`${provider.id}: fetch() did not return an array`);
       }
-      totalFound += jobs.length;
-
-      for (const job of jobs) {
-        if (!titleFilter(job.title)) {
-          totalFilteredTitle++;
-          continue;
-        }
-        if (!locationFilter(job.location)) {
-          totalFilteredLocation++;
-          continue;
-        }
-        if (seenUrls.has(job.url)) {
-          totalDupes++;
-          continue;
-        }
-        const key = `${job.company.toLowerCase()}::${job.title.toLowerCase()}`;
-        if (seenCompanyRoles.has(key)) {
-          totalDupes++;
-          continue;
-        }
-        // Mark as seen to avoid intra-scan dupes
-        seenUrls.add(job.url);
-        seenCompanyRoles.add(key);
-        newOffers.push({ ...job, source: sourceName });
-      }
+      const reconciliation = reconcileProviderJobs(jobs, {
+        titleFilter,
+        locationFilter,
+        seenUrls,
+        seenCompanyRoles,
+        sourceName,
+      });
+      totalFound += reconciliation.stats.totalFound;
+      totalFilteredTitle += reconciliation.stats.totalFilteredTitle;
+      totalFilteredLocation += reconciliation.stats.totalFilteredLocation;
+      totalDupes += reconciliation.stats.totalDupes;
+      newOffers.push(...reconciliation.offers);
     } catch (err) {
       errors.push({ company: company.name, error: err.message });
     }

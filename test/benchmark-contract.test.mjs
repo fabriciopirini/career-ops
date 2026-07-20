@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { release as osRelease } from 'node:os';
 import { compareArtifacts } from '../benchmark/compare.mjs';
 import { FIXTURE_VERSION, DEFAULT_ITERATIONS, DEFAULT_WARMUPS, deduplicateUrls, measure, normalizeProviderJobs, runBenchmark, trackerTransform } from '../benchmark/run-baseline.mjs';
 
@@ -87,10 +88,17 @@ test('benchmark artifact contains speed, reliability, work proxy, and unavailabl
   assert.equal(artifact.policy.warmups, DEFAULT_WARMUPS);
   assert.equal(artifact.policy.iterations, DEFAULT_ITERATIONS);
   assert.equal(artifact.telemetry.token_usage, 'unavailable');
+  assert.equal(artifact.environment.release, osRelease());
+  assert.equal(artifact.environment.platform, process.platform);
+  assert.equal(artifact.environment.arch, process.arch);
+  for (const name of ['tracker-250', 'tracker-1000', 'tracker-5000']) assert.ok(artifact.workloads[name]);
+  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.agentTasks, 3);
+  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.webSearchQueries, 4);
+  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.toolCalls, 9);
+  assert.deepEqual(artifact.reliability.failures, []);
   for (const workload of Object.values(artifact.workloads)) {
-    for (const key of ['median', 'p95', 'min', 'max', 'stddev']) assert.equal(typeof workload.timing.stats[key], 'number');
+    for (const key of ['sourceRecords', 'acceptedRecords', 'duplicateDrops', 'livenessCalls', 'evaluationCandidates', 'agentTasks', 'webSearchQueries', 'toolCalls', 'manifestChars']) assert.equal(typeof workload.workProxy[key], 'number');
     assert.equal(workload.reliability.failures, 0);
-    for (const key of ['sourceRecords', 'acceptedRecords', 'duplicateDrops', 'livenessCalls', 'evaluationCandidates', 'agentTasks', 'toolCalls', 'manifestChars']) assert.equal(typeof workload.workProxy[key], 'number');
   }
 });
 
@@ -144,6 +152,9 @@ test('comparison rejects fixture, Node, policy, workload, and network mismatches
   for (const mutate of [
     (artifact) => { artifact.fixtureVersion = '9.9.9'; },
     (artifact) => { artifact.environment.nodeMajor += 1; },
+    (artifact) => { artifact.environment.platform = 'other-platform'; },
+    (artifact) => { artifact.environment.arch = 'other-arch'; },
+    (artifact) => { artifact.environment.release = 'other-release'; },
     (artifact) => { artifact.policy.iterations += 1; },
     (artifact) => { delete artifact.workloads['url-deduplication']; },
     (artifact) => { artifact.network = 'live'; },

@@ -45,6 +45,18 @@ function rejectPrivateOrInvalid(url) {
   return null;
 }
 
+export function retryLiveness(attempt, { maxAttempts = 2 } = {}) {
+  if (typeof attempt !== 'function') throw new TypeError('attempt must be a function');
+  if (!Number.isInteger(maxAttempts) || maxAttempts < 1) throw new RangeError('maxAttempts must be a positive integer');
+  let result;
+  for (let index = 0; index < maxAttempts; index += 1) {
+    result = attempt();
+    if (result && typeof result.then === 'function') throw new TypeError('retryLiveness requires a synchronous attempt seam');
+    if (result?.result !== 'uncertain' || result?.code !== 'navigation_error') return result;
+  }
+  return result;
+}
+
 export async function checkUrlLiveness(page, url) {
   const guardError = rejectPrivateOrInvalid(url);
   if (guardError) {

@@ -35,18 +35,18 @@
     },
     "pipeline": {
       "accepted": ["same-title-b","design-system","empty-location"],
-      "rejected": []
+      "rejected": [{"id":"unsupported-provider","code":"unsupported_provider"}]
     },
     "workProxy": {
       "agentTasks": 3,
-      "webSearchQueries": 2,
-      "toolCalls": 5,
+      "webSearchQueries": 4,
+      "toolCalls": 9,
       "sourceRecords": 6,
       "acceptedRecords": 3,
-      "duplicateDrops": 3,
+      "duplicateDrops": 2,
       "livenessCalls": 3,
       "evaluationCandidates": 3,
-      "manifestChars": 0
+      "manifestChars": 687
     }
   }
 }

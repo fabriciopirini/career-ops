@@ -26,6 +26,9 @@ function requireCompatible(baseline, candidate) {
   if (baseline.network !== 'none' || candidate.network !== 'none') throw new Error('comparison accepts deterministic artifacts only; live-network runs are not release gates');
   if (baseline.fixtureVersion !== candidate.fixtureVersion) throw new Error(`fixture version mismatch: ${baseline.fixtureVersion} vs ${candidate.fixtureVersion}`);
   if (baseline.schemaVersion !== candidate.schemaVersion) throw new Error(`benchmark schema mismatch: ${baseline.schemaVersion} vs ${candidate.schemaVersion}`);
+  if (baseline.environment?.platform !== candidate.environment?.platform) throw new Error(`platform mismatch: ${baseline.environment?.platform} vs ${candidate.environment?.platform}`);
+  if (baseline.environment?.arch !== candidate.environment?.arch) throw new Error(`architecture mismatch: ${baseline.environment?.arch} vs ${candidate.environment?.arch}`);
+  if (baseline.environment?.release !== candidate.environment?.release) throw new Error(`OS release mismatch: ${baseline.environment?.release} vs ${candidate.environment?.release}`);
   if (baseline.environment?.nodeMajor !== candidate.environment?.nodeMajor) throw new Error(`Node major version mismatch: ${baseline.environment?.nodeMajor} vs ${candidate.environment?.nodeMajor}`);
   for (const field of REQUIRED_POLICY) {
     if (baseline.policy?.[field] !== candidate.policy?.[field]) throw new Error(`iteration policy mismatch at ${field}: ${baseline.policy?.[field]} vs ${candidate.policy?.[field]}`);
