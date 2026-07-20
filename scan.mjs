@@ -46,8 +46,6 @@ const PIPELINE_PATH = "data/pipeline.md";
 const APPLICATIONS_PATH = "data/applications.md";
 const PROVIDERS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "providers");
 
-// Ensure required directories exist (fresh setup)
-mkdirSync("data", { recursive: true });
 
 const CONCURRENCY = 10;
 
@@ -227,32 +225,38 @@ function loadSeenCompanyRoles() {
 
 // ── Pipeline writer ─────────────────────────────────────────────────
 
-function appendToPipeline(offers) {
-  if (offers.length === 0) return;
+const PENDING_MARKERS = ["## Pending", "## Pendientes"];
 
-  const originalText = readFileSync(PIPELINE_PATH, "utf-8");
+export function appendOffersToPipelineText(originalText, offers) {
+  if (offers.length === 0) return originalText;
   let text = originalText;
-
-  // Find "## Pending" section and append after it
-  const marker = "## Pending";
-  const idx = text.indexOf(marker);
-  if (idx === -1) {
+  const markerMatch = PENDING_MARKERS
+    .map((marker) => ({ marker, index: text.indexOf(marker) }))
+    .filter(({ index }) => index !== -1)
+    .sort((left, right) => left.index - right.index)[0];
+  if (!markerMatch) {
     // No Pending section — append at end before Procesadas
+    const marker = PENDING_MARKERS[0];
     const procIdx = text.indexOf("## Procesadas");
     const insertAt = procIdx === -1 ? text.length : procIdx;
     const block =
       `\n${marker}\n\n` + offers.map((o) => `- [ ] ${o.url} | ${o.company} | ${o.title}`).join("\n") + "\n\n";
-    text = text.slice(0, insertAt) + block + text.slice(insertAt);
-  } else {
-    // Find the end of existing Pending content (next ## or end)
-    const afterMarker = idx + marker.length;
-    const nextSection = text.indexOf("\n## ", afterMarker);
-    const insertAt = nextSection === -1 ? text.length : nextSection;
-
-    const block = "\n" + offers.map((o) => `- [ ] ${o.url} | ${o.company} | ${o.title}`).join("\n") + "\n";
-    text = text.slice(0, insertAt) + block + text.slice(insertAt);
+    return text.slice(0, insertAt) + block + text.slice(insertAt);
   }
 
+  // Find the end of existing Pending/Pendientes content (next ## or end)
+  const afterMarker = markerMatch.index + markerMatch.marker.length;
+  const nextSection = text.indexOf("\n## ", afterMarker);
+  const insertAt = nextSection === -1 ? text.length : nextSection;
+  const block = "\n" + offers.map((o) => `- [ ] ${o.url} | ${o.company} | ${o.title}`).join("\n") + "\n";
+  return text.slice(0, insertAt) + block + text.slice(insertAt);
+}
+
+function appendToPipeline(offers) {
+  if (offers.length === 0) return;
+
+  const originalText = readFileSync(PIPELINE_PATH, "utf-8");
+  const text = appendOffersToPipelineText(originalText, offers);
   const commit = commitText({
     read: () => readFileSync(PIPELINE_PATH, "utf-8"),
     write: (next) => writeFileSync(PIPELINE_PATH, next, "utf-8"),
@@ -261,6 +265,7 @@ function appendToPipeline(offers) {
   });
   if (commit.status !== "committed") throw new Error(`pipeline commit ${commit.status}`);
 }
+
 
 function appendToScanHistory(offers, date, status = "added") {
   // Ensure file + header exist. Location appended as 7th column for non-breaking
@@ -524,6 +529,7 @@ async function main() {
   }
 
   // 6. Write results
+  if (!dryRun) mkdirSync("data", { recursive: true });
   if (!dryRun && verifiedOffers.length > 0) {
     appendToPipeline(verifiedOffers);
     appendToScanHistory(verifiedOffers, date);

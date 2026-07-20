@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { release as osRelease } from 'node:os';
+import { release as osRelease, tmpdir } from 'node:os';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { compareArtifacts } from '../benchmark/compare.mjs';
-import { routeLivenessResult } from '../scan.mjs';
+import { appendOffersToPipelineText, routeLivenessResult } from '../scan.mjs';
 import { FIXTURE_VERSION, DEFAULT_ITERATIONS, DEFAULT_WARMUPS, deduplicateUrls, measure, normalizeProviderJobs, observeMalformedAddition, runBenchmark, trackerTransform } from '../benchmark/run-baseline.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -29,6 +30,29 @@ const requiredFixtureFiles = [
   'expected/pipeline.json',
   'expected/reliability.json',
 ];
+
+test('importing scan does not create a data directory', () => {
+  const cwd = mkdtempSync(join(tmpdir(), 'career-ops-scan-import-'));
+  try {
+    const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(pathToFileURL(join(ROOT, 'scan.mjs')).href)})`], {
+      cwd,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(existsSync(join(cwd, 'data')), false);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test('pipeline append preserves English and Spanish pending section markers', () => {
+  const offer = { url: 'https://example.test/job', company: 'Example', title: 'Frontend Engineer' };
+  for (const marker of ['## Pending', '## Pendientes']) {
+    const result = appendOffersToPipelineText(`# Queue\n\n${marker}\n\n## Procesadas\n`, [offer]);
+    assert.ok(result.includes(`${marker}\n`));
+    assert.ok(result.indexOf(offer.url) < result.indexOf('## Procesadas'));
+  }
+});
 
 test('fixture manifest is synthetic, versioned, and complete', () => {
   const manifest = json('manifest.json');
@@ -167,7 +191,11 @@ test('comparison rejects increased evaluation work and reliability failures', ()
   const baseline = runBenchmark({ warmups: 1, iterations: 3 });
   const candidate = clone(baseline);
   candidate.workloads['local-scan-pipeline'].syntheticWorkProxy.evaluationCandidates += 1;
-  candidate.workloads['local-scan-pipeline'].reliability.failures = 1;
+  candidate.workloads['local-scan-pipeline'].reliability.knownFailures.push('synthetic-new-failure');
+  candidate.workloads['local-scan-pipeline'].reliability.failures += 1;
+  candidate.reliability.knownFailures.push('synthetic-new-failure');
+  candidate.reliability.failures.push('synthetic-new-failure');
+  candidate.reliability.failureRecords.push({ id: 'synthetic-new-failure', workload: 'local-scan-pipeline', expected: 'pass', observed: 'failure' });
   const result = compareArtifacts(baseline, candidate);
   assert.equal(result.pass, false);
   assert.ok(result.failures.some((failure) => failure.includes('reliability')));
@@ -178,9 +206,15 @@ test('comparison rejects omitted known-failure IDs even when count is unchanged'
   const baseline = runBenchmark({ warmups: 1, iterations: 1 });
   const candidate = clone(baseline);
   candidate.workloads['tracker-250'].reliability.knownFailures = [];
-  const result = compareArtifacts(baseline, candidate);
-  assert.equal(result.pass, false);
-  assert.ok(result.failures.some((failure) => failure.includes('tracker-250') && failure.includes('known-failure IDs')));
+  assert.throws(() => compareArtifacts(baseline, candidate), /reliability count does not match known-failure IDs/);
+});
+
+test('comparison rejects global failure metadata that contradicts workload IDs', () => {
+  const baseline = runBenchmark({ warmups: 1, iterations: 1 });
+  const candidate = clone(baseline);
+  candidate.workloads['tracker-250'].reliability.knownFailures = [];
+  candidate.workloads['tracker-250'].reliability.failures = 0;
+  assert.throws(() => compareArtifacts(baseline, candidate), /knownFailures do not match workload failure ID union/);
 });
 
 test('comparison rejects fixture, Node, policy, workload, and network mismatches', () => {

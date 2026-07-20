@@ -32,10 +32,55 @@ function observedFailures(artifact, label) {
   return failureIds(artifact.reliability?.failures, `${label} reliability.failures`);
 }
 
-function addedValues(before, after) {
-  const previous = new Set(before);
-  return after.filter((value) => !previous.has(value));
+function sameIdSet(left, right) {
+  const leftSet = new Set(left);
+  const rightSet = new Set(right);
+  return leftSet.size === rightSet.size && [...leftSet].every((id) => rightSet.has(id));
 }
+
+function setDifference(before, after) {
+  const previous = new Set(before);
+  return [...new Set(after)].filter((id) => !previous.has(id));
+}
+
+function validateFailureMetadata(artifact, label) {
+  const globalFailures = observedFailures(artifact, label);
+  const globalKnownFailures = failureIds(artifact.reliability?.knownFailures, `${label} reliability.knownFailures`);
+  if (!sameIdSet(globalFailures, globalKnownFailures)) throw new Error(`${label} reliability failure IDs do not match knownFailures`);
+
+  const workloadIds = [];
+  for (const name of Object.keys(artifact.workloads ?? {}).sort()) {
+    const workload = artifact.workloads[name];
+    const knownFailures = failureIds(workload.reliability?.knownFailures, `${name} ${label} reliability.knownFailures`);
+    const count = workload.reliability?.failures;
+    if (!Number.isInteger(count) || count < 0) throw new Error(`${name} ${label} reliability.failures must be a non-negative integer`);
+    if (count !== knownFailures.length) throw new Error(`${name}: ${label} reliability count does not match known-failure IDs`);
+    workloadIds.push(...knownFailures);
+  }
+  if (!sameIdSet(globalKnownFailures, workloadIds)) throw new Error(`${label} reliability knownFailures do not match workload failure ID union`);
+
+  if (artifact.reliability?.failureRecords !== undefined) {
+    if (!Array.isArray(artifact.reliability.failureRecords)) throw new Error(`${label} reliability.failureRecords must be an array`);
+    const recordIds = [];
+    const recordsByWorkload = new Map();
+    for (const record of artifact.reliability.failureRecords) {
+      if (!record || typeof record.id !== 'string' || !record.id || typeof record.workload !== 'string' || !record.workload) {
+        throw new Error(`${label} reliability.failureRecords must include failure IDs and workloads`);
+      }
+      recordIds.push(record.id);
+      if (!recordsByWorkload.has(record.workload)) recordsByWorkload.set(record.workload, []);
+      recordsByWorkload.get(record.workload).push(record.id);
+    }
+    if (!sameIdSet(globalKnownFailures, recordIds)) throw new Error(`${label} reliability failureRecords do not match knownFailures`);
+    for (const name of Object.keys(artifact.workloads ?? {}).sort()) {
+      const knownFailures = failureIds(artifact.workloads[name].reliability?.knownFailures, `${name} ${label} reliability.knownFailures`);
+      if (!sameIdSet(knownFailures, recordsByWorkload.get(name) ?? [])) throw new Error(`${name}: ${label} reliability failureRecords do not match known-failure IDs`);
+    }
+  }
+
+  return { failures: globalFailures, knownFailures: globalKnownFailures };
+}
+
 
 function requireCompatible(baseline, candidate) {
   if (baseline.network !== 'none' || candidate.network !== 'none') throw new Error('comparison accepts deterministic artifacts only; live-network runs are not release gates');
@@ -55,16 +100,14 @@ function requireCompatible(baseline, candidate) {
 }
 export function compareArtifacts(baseline, candidate) {
   requireCompatible(baseline, candidate);
+  const baselineMetadata = validateFailureMetadata(baseline, 'baseline');
+  const candidateMetadata = validateFailureMetadata(candidate, 'candidate');
   const workloads = {};
   const failures = [];
-  const baselineReliabilityFailures = observedFailures(baseline, 'baseline');
-  const candidateReliabilityFailures = observedFailures(candidate, 'candidate');
-  const baselineKnownFailures = failureIds(baseline.reliability?.knownFailures, 'baseline reliability.knownFailures');
-  const candidateKnownFailures = failureIds(candidate.reliability?.knownFailures, 'candidate reliability.knownFailures');
-  if (JSON.stringify([...new Set(baselineReliabilityFailures)].sort()) !== JSON.stringify([...new Set(baselineKnownFailures)].sort())) throw new Error('baseline reliability failure IDs do not match knownFailures');
-  if (JSON.stringify([...new Set(candidateReliabilityFailures)].sort()) !== JSON.stringify([...new Set(candidateKnownFailures)].sort())) throw new Error('candidate reliability failure IDs do not match knownFailures');
-  const introducedReliabilityFailures = addedValues(baselineReliabilityFailures, candidateReliabilityFailures);
-  const resolvedReliabilityFailures = addedValues(candidateReliabilityFailures, baselineReliabilityFailures);
+  const baselineReliabilityFailures = baselineMetadata.failures;
+  const candidateReliabilityFailures = candidateMetadata.failures;
+  const introducedReliabilityFailures = setDifference(baselineReliabilityFailures, candidateReliabilityFailures);
+  const resolvedReliabilityFailures = setDifference(candidateReliabilityFailures, baselineReliabilityFailures);
   if (introducedReliabilityFailures.length) failures.push(`global reliability failures introduced=${introducedReliabilityFailures.length}`);
   for (const name of Object.keys(baseline.workloads).sort()) {
     const before = baseline.workloads[name];
@@ -80,8 +123,8 @@ export function compareArtifacts(baseline, candidate) {
     const beforeKnown = failureIds(before.reliability?.knownFailures, `${name} baseline reliability.knownFailures`);
     const afterKnown = failureIds(after.reliability?.knownFailures, `${name} candidate reliability.knownFailures`);
     const countMismatch = beforeReliability !== beforeKnown.length || afterReliability !== afterKnown.length;
-    const introducedWorkloadFailures = addedValues(beforeKnown, afterKnown);
-    const resolvedWorkloadFailures = addedValues(afterKnown, beforeKnown);
+    const introducedWorkloadFailures = setDifference(beforeKnown, afterKnown);
+    const resolvedWorkloadFailures = setDifference(afterKnown, beforeKnown);
     if (countMismatch) failures.push(`${name}: reliability count does not match known-failure IDs`);
     const proxyKeys = new Set([...Object.keys(before.syntheticWorkProxy ?? {}), ...Object.keys(after.syntheticWorkProxy ?? {})]);
     const syntheticWorkProxy = {};
