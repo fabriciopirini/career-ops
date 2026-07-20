@@ -37,7 +37,7 @@
       "accepted": ["same-title-b","design-system","empty-location"],
       "rejected": [{"id":"unsupported-provider","code":"unsupported_provider"}]
     },
-    "workProxy": {
+    "syntheticWorkProxy": {
       "agentTasks": 3,
       "webSearchQueries": 4,
       "toolCalls": 9,

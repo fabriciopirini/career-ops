@@ -3,7 +3,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, mkdtempSync, cpSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { arch, release, tmpdir } from 'node:os';
 import { classifyLiveness } from '../liveness-core.mjs';
@@ -52,9 +52,7 @@ function assertEqual(actual, expected, label) {
   if (left !== right) throw new Error(`${label}: expected ${right}, received ${left}`);
 }
 
-function workProxy({ sourceRecords = 0, acceptedRecords = 0, duplicateDrops = 0, livenessCalls = 0, evaluationCandidates = 0, agentTasks = 0, webSearchQueries = 0, toolCalls = 0, manifestChars = 0 }) {
-  return { sourceRecords, acceptedRecords, duplicateDrops, livenessCalls, evaluationCandidates, agentTasks, webSearchQueries, toolCalls, manifestChars };
-}
+function syntheticWorkProxy({ sourceRecords = 0, acceptedRecords = 0, duplicateDrops = 0, livenessCalls = 0, evaluationCandidates = 0, agentTasks = 0, webSearchQueries = 0, toolCalls = 0, manifestChars = 0 }) { return { sourceRecords, acceptedRecords, duplicateDrops, livenessCalls, evaluationCandidates, agentTasks, webSearchQueries, toolCalls, manifestChars }; }
 
 function createInstrumentedAdapters() {
   const queries = new Set();
@@ -86,14 +84,14 @@ function runProviderFixture() {
   const fixture = readJson('provider-jobs.json');
   const result = normalizeProviderJobs(fixture.records, fixture.config);
   assertEqual(result, fixture.expected, 'provider fixture');
-  return { result, workProxy: workProxy({ sourceRecords: fixture.records.length, acceptedRecords: result.accepted.length }) };
+  return { result, syntheticWorkProxy: syntheticWorkProxy({ sourceRecords: fixture.records.length, acceptedRecords: result.accepted.length }) };
 }
 
 function runDedupFixture(providerRun) {
   const fixture = readJson('pipeline-candidates.json');
   const result = deduplicateUrls(providerRun.result.accepted, fixture.seenUrls);
   assertEqual(result, fixture.expected.dedup, 'dedup fixture');
-  return { result, workProxy: workProxy({ sourceRecords: providerRun.result.accepted.length, acceptedRecords: result.accepted.length, duplicateDrops: result.duplicates.length }) };
+  return { result, syntheticWorkProxy: syntheticWorkProxy({ sourceRecords: providerRun.result.accepted.length, acceptedRecords: result.accepted.length, duplicateDrops: result.duplicates.length }) };
 }
 
 function runLivenessFixture() {
@@ -105,7 +103,7 @@ function runLivenessFixture() {
       : classifyLiveness(input)),
   }));
   assertEqual(results, fixture.expected, 'liveness fixture');
-  return { results, workProxy: workProxy({ livenessCalls: results.length }) };
+  return { results, syntheticWorkProxy: syntheticWorkProxy({ livenessCalls: results.length }) };
 }
 
 function runTrackerFixture() {
@@ -152,7 +150,7 @@ function runPipelineFixture(providerRun, livenessRun) {
   const result = { accepted: accepted.map(({ id }) => id), rejected };
   assertEqual(result, fixture.expected.pipeline, 'pipeline fixture');
   const counters = adapters.snapshot();
-  const proxy = workProxy({
+  const proxy = syntheticWorkProxy({
     sourceRecords: reconciliation.counters.candidateRecords,
     acceptedRecords: accepted.length,
     duplicateDrops: reconciliation.duplicates.length,
@@ -163,8 +161,8 @@ function runPipelineFixture(providerRun, livenessRun) {
     toolCalls: counters.toolCalls,
     manifestChars: JSON.stringify(fixture.candidates).length,
   });
-  assertEqual(proxy, fixture.expected.workProxy, 'pipeline work proxy');
-  return { result, workProxy: proxy, counters };
+  assertEqual(proxy, fixture.expected.syntheticWorkProxy, 'pipeline synthetic work proxy');
+  return { result, syntheticWorkProxy: proxy, counters };
 }
 
 function runRetryableLivenessScenario() {
@@ -202,11 +200,8 @@ function withTempRoot(callback) {
 }
 
 function runCopiedNodeScript(root, scriptName) {
-  try {
-    return { status: 0, output: execFileSync(process.execPath, [join(root, scriptName)], { cwd: root, encoding: 'utf8' }) };
-  } catch (error) {
-    return { status: error.status ?? 1, output: `${error.stdout ?? ''}${error.stderr ?? ''}` };
-  }
+  const result = spawnSync(process.execPath, [join(root, scriptName)], { cwd: root, encoding: 'utf8' });
+  return { status: result.status ?? 1, output: `${result.stdout ?? ''}${result.stderr ?? ''}` };
 }
 
 function prepareTrackerScriptRoot(root, scriptName) {
@@ -216,14 +211,16 @@ function prepareTrackerScriptRoot(root, scriptName) {
   cpSync(join(ROOT, 'tracker-core.mjs'), join(root, 'tracker-core.mjs'));
 }
 
-function observeMalformedAddition() {
+export function observeMalformedAddition({ runScript = runCopiedNodeScript } = {}) {
   return withTempRoot((root) => {
     prepareTrackerScriptRoot(root, 'merge-tracker.mjs');
     const original = readFileSync(join(FIXTURE_ROOT, 'tracker-small.md'), 'utf8');
     writeFileSync(join(root, 'data', 'applications.md'), original);
     const addition = '251\t2026-01-01\tSynthetic Company\tSynthetic Role\tEvaluated\t4.0\t—';
     writeFileSync(join(root, 'batch', 'tracker-additions', 'malformed.tsv'), addition);
-    runCopiedNodeScript(root, 'merge-tracker.mjs');
+    const subprocess = runScript(root, 'merge-tracker.mjs');
+    if (subprocess.status !== 0) return `subprocess-failed:${subprocess.status}`;
+    if (!subprocess.output.includes('Skipping malformed TSV malformed.tsv')) return 'subprocess-output-missing';
     const pending = existsSync(join(root, 'batch', 'tracker-additions', 'malformed.tsv'));
     const archived = existsSync(join(root, 'batch', 'tracker-additions', 'merged', 'malformed.tsv'));
     return pending && !archived ? 'pending-not-archived' : 'archived-malformed-addition';
@@ -315,7 +312,7 @@ function runReliability(providerRun, dedupRun, livenessRun, trackerRun, pipeline
     }],
     ['parallel-reserved-ids', {
       workload: 'tracker-250',
-      observed: new Set(reserveTrackerIds([1, 2], 5, { nextId: 3 })).size === 5 ? 'unique-reserved-ids' : 'duplicate-reserved-ids',
+      observed: 'production-reservation-unavailable',
     }],
     ['same-batch-reconciliation', {
       workload: 'local-scan-pipeline',
@@ -336,17 +333,29 @@ function runReliability(providerRun, dedupRun, livenessRun, trackerRun, pipeline
     }],
   ]);
   const failures = [];
+  const failureRecords = [];
   const byWorkload = Object.fromEntries(WORKLOADS.map((name) => [name, 0]));
   const checksByWorkload = Object.fromEntries(WORKLOADS.map((name) => [name, 0]));
   for (const check of fixture.checks) {
     const observation = observations.get(check.id);
-    if (observation) checksByWorkload[observation.workload] += 1;
+    const workload = observation?.workload ?? check.workload;
+    if (!WORKLOADS.includes(workload)) throw new Error(`reliability check ${check.id} has no expected workload`);
+    checksByWorkload[workload] += 1;
     if (!observation || observation.observed !== check.expected) {
-      const detail = `${check.id}: expected ${check.expected}, observed ${observation?.observed ?? 'missing'}`;
-      failures.push(detail);
-      if (observation) byWorkload[observation.workload] += 1;
+      const record = {
+        id: check.id,
+        workload,
+        expected: check.expected,
+        observed: observation?.observed ?? 'missing',
+      };
+      failureRecords.push(record);
+      failures.push(check.id);
+      byWorkload[workload] += 1;
     }
   }
+  const knownFailuresByWorkload = Object.fromEntries(
+    WORKLOADS.map((name) => [name, failureRecords.filter((failure) => failure.workload === name).map((failure) => failure.id)]),
+  );
   const observed = Object.fromEntries([...observations].map(([id, value]) => [id, value.observed]));
   const expected = Object.fromEntries(fixture.checks.map((check) => [check.id, check.expected]));
   return {
@@ -354,6 +363,8 @@ function runReliability(providerRun, dedupRun, livenessRun, trackerRun, pipeline
     exitMode: 'record-only',
     failures,
     knownFailures: failures,
+    failureRecords,
+    knownFailuresByWorkload,
     byWorkload,
     checksByWorkload,
     expected,
@@ -379,7 +390,6 @@ export function measure(name, operation, { warmups = DEFAULT_WARMUPS, iterations
   }
   return { name, warmups, iterations, stats: summarize(samples) };
 }
-
 function gitSha() {
   try { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); }
   catch { return 'unknown'; }
@@ -393,15 +403,15 @@ export function renderMarkdown(artifact) {
     const stats = workload.timing.stats;
     lines.push(`| ${name} | ${formatMs(stats.median)} | ${formatMs(stats.p95)} | ${formatMs(stats.min)} | ${formatMs(stats.max)} | ${formatMs(stats.stddev)} | ${workload.reliability.status} | ${workload.reliability.failures} |`);
   }
-  lines.push('', '## Work proxy', '', '| Workload | Source | Accepted | Duplicate drops | Liveness calls | Evaluation candidates | Agent tasks | WebSearch queries | Tool calls | Manifest chars |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
+  lines.push('', '## Synthetic work proxy (fixture instrumentation; actual agent/tool telemetry unavailable)', '', '| Workload | Source | Accepted | Duplicate drops | Liveness calls | Evaluation candidates | Agent tasks | WebSearch queries | Tool calls | Manifest chars |', '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|');
   for (const [name, workload] of Object.entries(artifact.workloads)) {
-    const proxy = workload.workProxy;
+    const proxy = workload.syntheticWorkProxy;
     lines.push(`| ${name} | ${proxy.sourceRecords} | ${proxy.acceptedRecords} | ${proxy.duplicateDrops} | ${proxy.livenessCalls} | ${proxy.evaluationCandidates} | ${proxy.agentTasks} | ${proxy.webSearchQueries} | ${proxy.toolCalls} | ${proxy.manifestChars} |`);
   }
   if (artifact.reliability.knownFailures.length > 0) {
     lines.push('', '## Known reliability failures', '', ...artifact.reliability.knownFailures.map((failure) => `- ${failure}`));
   }
-  lines.push('', 'Token usage is unavailable. Work-proxy counters are not token telemetry and must not be described as token counts.', '');
+  lines.push('', 'Token usage and actual agent/tool telemetry are unavailable. Synthetic work proxy counters are fixture instrumentation, not production calls or token telemetry.', '');
   return lines.join('\n');
 }
 
@@ -431,27 +441,18 @@ export function runBenchmark({ warmups = DEFAULT_WARMUPS, iterations = DEFAULT_I
     'local-scan-pipeline': () => runPipelineFixture(providerRun, livenessRun),
   };
   const proxies = {
-    'provider-normalization': providerRun.workProxy,
-    'url-deduplication': dedupRun.workProxy,
-    'liveness-classification': livenessRun.workProxy,
-    'tracker-250': workProxy({ sourceRecords: trackerRun.results.small.rows, acceptedRecords: trackerRun.results.small.rows }),
-    'tracker-1000': workProxy({ sourceRecords: trackerRun.results.medium.rows, acceptedRecords: trackerRun.results.medium.rows }),
-    'tracker-5000': workProxy({ sourceRecords: trackerRun.results.large.rows, acceptedRecords: trackerRun.results.large.rows }),
-    'local-scan-pipeline': pipelineRun.workProxy,
-  };
-  const reliabilityNames = {
-    'provider-normalization': 'provider-normalization',
-    'url-deduplication': 'url-deduplication',
-    'liveness-classification': 'liveness-classification',
-    'tracker-250': 'tracker-250',
-    'tracker-1000': 'tracker-1000',
-    'tracker-5000': 'tracker-5000',
-    'local-scan-pipeline': 'local-scan-pipeline',
+    'provider-normalization': providerRun.syntheticWorkProxy,
+    'url-deduplication': dedupRun.syntheticWorkProxy,
+    'liveness-classification': livenessRun.syntheticWorkProxy,
+    'tracker-250': syntheticWorkProxy({ sourceRecords: trackerRun.results.small.rows, acceptedRecords: trackerRun.results.small.rows }),
+    'tracker-1000': syntheticWorkProxy({ sourceRecords: trackerRun.results.medium.rows, acceptedRecords: trackerRun.results.medium.rows }),
+    'tracker-5000': syntheticWorkProxy({ sourceRecords: trackerRun.results.large.rows, acceptedRecords: trackerRun.results.large.rows }),
+    'local-scan-pipeline': pipelineRun.syntheticWorkProxy,
   };
   const workloads = {};
   for (const name of WORKLOADS) {
-    const reliabilityName = reliabilityNames[name];
-    const knownFailures = reliability.failures.filter((failure) => failure.startsWith(`${reliabilityName}:`));
+    const knownFailures = reliability.knownFailuresByWorkload[name];
+    if (!Array.isArray(knownFailures)) throw new Error(`missing reliability workload association for ${name}`);
     workloads[name] = {
       fixtureVersion: FIXTURE_VERSION,
       targeted: false,
@@ -460,10 +461,10 @@ export function runBenchmark({ warmups = DEFAULT_WARMUPS, iterations = DEFAULT_I
       reliability: {
         status: knownFailures.length > 0 ? 'KNOWN_FAILURES' : 'PASS',
         failures: knownFailures.length,
-        checks: reliability.checksByWorkload[reliabilityName],
+        checks: reliability.checksByWorkload[name],
         knownFailures,
       },
-      workProxy: proxies[name],
+      syntheticWorkProxy: proxies[name],
     };
   }
   return {
@@ -481,7 +482,7 @@ export function runBenchmark({ warmups = DEFAULT_WARMUPS, iterations = DEFAULT_I
       reliabilityExitMode: failOnReliability ? 'fail-on-reliability' : 'record-only',
     },
     command: `npm run benchmark -- --warmups=${warmups} --iterations=${iterations}${failOnReliability ? ' --fail-on-reliability' : ''}`,
-    telemetry: { token_usage: 'unavailable' },
+    telemetry: { token_usage: 'unavailable', agent_tool_telemetry: 'unavailable', note: 'actual agent/tool telemetry unavailable; syntheticWorkProxy is fixture instrumentation' },
     reliability: {
       status: reliability.status,
       exitMode: failOnReliability ? 'fail-on-reliability' : reliability.exitMode,
@@ -489,6 +490,7 @@ export function runBenchmark({ warmups = DEFAULT_WARMUPS, iterations = DEFAULT_I
       knownFailures: reliability.knownFailures,
       expected: reliability.expected,
       observations: reliability.observations,
+      failureRecords: reliability.failureRecords,
     },
     workloads,
   };
@@ -517,6 +519,7 @@ export function main(argv = process.argv.slice(2)) {
   console.log(`Benchmark artifact: ${options.output}`);
   console.log(`Fixture ${artifact.fixtureVersion}; ${artifact.policy.warmups} warmups; ${artifact.policy.iterations} measured iterations; token_usage: unavailable; reliability: ${artifact.reliability.status} (${artifact.reliability.failures.length} observed failures; exit mode ${artifact.reliability.exitMode})`);
   for (const [name, workload] of Object.entries(artifact.workloads)) console.log(`${name}: median ${formatMs(workload.timing.stats.median)}, p95 ${formatMs(workload.timing.stats.p95)}, reliability ${workload.reliability.status} (${workload.reliability.failures} failures)`);
+  if (artifact.reliability.failures.length > 0) console.log(`Known reliability failure IDs: ${artifact.reliability.failures.join(', ')}`);
   if (options.failOnReliability && artifact.reliability.failures.length > 0) process.exitCode = 1;
   return artifact;
 }

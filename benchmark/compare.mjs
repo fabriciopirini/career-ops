@@ -22,8 +22,14 @@ function delta(before, after) {
   return { absolute, percentage: before === 0 ? (after === 0 ? 0 : null) : (absolute / before) * 100 };
 }
 
-function observedFailures(artifact) {
-  return Array.isArray(artifact.reliability?.failures) ? artifact.reliability.failures : [];
+function failureIds(value, label) {
+  if (!Array.isArray(value)) throw new Error(`${label} must include known-failure IDs`);
+  if (value.some((id) => typeof id !== 'string' || !id)) throw new Error(`${label} must contain non-empty failure IDs`);
+  return [...new Set(value)];
+}
+
+function observedFailures(artifact, label) {
+  return failureIds(artifact.reliability?.failures, `${label} reliability.failures`);
 }
 
 function addedValues(before, after) {
@@ -47,18 +53,19 @@ function requireCompatible(baseline, candidate) {
   const afterNames = Object.keys(candidate.workloads ?? {}).sort();
   if (JSON.stringify(beforeNames) !== JSON.stringify(afterNames)) throw new Error('workload set mismatch');
 }
-
 export function compareArtifacts(baseline, candidate) {
   requireCompatible(baseline, candidate);
   const workloads = {};
   const failures = [];
-  const baselineReliabilityFailures = observedFailures(baseline);
-  const candidateReliabilityFailures = observedFailures(candidate);
+  const baselineReliabilityFailures = observedFailures(baseline, 'baseline');
+  const candidateReliabilityFailures = observedFailures(candidate, 'candidate');
+  const baselineKnownFailures = failureIds(baseline.reliability?.knownFailures, 'baseline reliability.knownFailures');
+  const candidateKnownFailures = failureIds(candidate.reliability?.knownFailures, 'candidate reliability.knownFailures');
+  if (JSON.stringify([...new Set(baselineReliabilityFailures)].sort()) !== JSON.stringify([...new Set(baselineKnownFailures)].sort())) throw new Error('baseline reliability failure IDs do not match knownFailures');
+  if (JSON.stringify([...new Set(candidateReliabilityFailures)].sort()) !== JSON.stringify([...new Set(candidateKnownFailures)].sort())) throw new Error('candidate reliability failure IDs do not match knownFailures');
   const introducedReliabilityFailures = addedValues(baselineReliabilityFailures, candidateReliabilityFailures);
   const resolvedReliabilityFailures = addedValues(candidateReliabilityFailures, baselineReliabilityFailures);
-  if (introducedReliabilityFailures.length) {
-    failures.push(`global reliability failures introduced=${introducedReliabilityFailures.length}`);
-  }
+  if (introducedReliabilityFailures.length) failures.push(`global reliability failures introduced=${introducedReliabilityFailures.length}`);
   for (const name of Object.keys(baseline.workloads).sort()) {
     const before = baseline.workloads[name];
     const after = candidate.workloads[name];
@@ -70,27 +77,25 @@ export function compareArtifacts(baseline, candidate) {
     const p95 = delta(p95Before, p95After);
     const beforeReliability = Number(before.reliability?.failures ?? 0);
     const afterReliability = Number(after.reliability?.failures ?? 0);
-    const beforeKnown = Array.isArray(before.reliability?.knownFailures) ? before.reliability.knownFailures : [];
-    const afterKnown = Array.isArray(after.reliability?.knownFailures) ? after.reliability.knownFailures : [];
-    const introducedWorkloadFailures = beforeKnown.length || afterKnown.length
-      ? addedValues(beforeKnown, afterKnown)
-      : afterReliability > beforeReliability ? [`${name}: reliability count increased`] : [];
-    const resolvedWorkloadFailures = beforeKnown.length || afterKnown.length
-      ? addedValues(afterKnown, beforeKnown)
-      : beforeReliability > afterReliability ? [`${name}: reliability count decreased`] : [];
-    const proxyKeys = new Set([...Object.keys(before.workProxy ?? {}), ...Object.keys(after.workProxy ?? {})]);
-    const workProxy = {};
+    const beforeKnown = failureIds(before.reliability?.knownFailures, `${name} baseline reliability.knownFailures`);
+    const afterKnown = failureIds(after.reliability?.knownFailures, `${name} candidate reliability.knownFailures`);
+    const countMismatch = beforeReliability !== beforeKnown.length || afterReliability !== afterKnown.length;
+    const introducedWorkloadFailures = addedValues(beforeKnown, afterKnown);
+    const resolvedWorkloadFailures = addedValues(afterKnown, beforeKnown);
+    if (countMismatch) failures.push(`${name}: reliability count does not match known-failure IDs`);
+    const proxyKeys = new Set([...Object.keys(before.syntheticWorkProxy ?? {}), ...Object.keys(after.syntheticWorkProxy ?? {})]);
+    const syntheticWorkProxy = {};
     for (const key of [...proxyKeys].sort()) {
-      const beforeValue = numeric(before.workProxy?.[key] ?? 0, `${name} baseline proxy ${key}`);
-      const afterValue = numeric(after.workProxy?.[key] ?? 0, `${name} candidate proxy ${key}`);
-      workProxy[key] = { before: beforeValue, after: afterValue, ...delta(beforeValue, afterValue) };
+      const beforeValue = numeric(before.syntheticWorkProxy?.[key] ?? 0, `${name} baseline proxy ${key}`);
+      const afterValue = numeric(after.syntheticWorkProxy?.[key] ?? 0, `${name} candidate proxy ${key}`);
+      syntheticWorkProxy[key] = { before: beforeValue, after: afterValue, ...delta(beforeValue, afterValue) };
     }
-    const reliabilityPass = introducedWorkloadFailures.length === 0;
+    const reliabilityPass = introducedWorkloadFailures.length === 0 && !countMismatch;
     const unaffectedSpeedPass = median.percentage === null || median.percentage <= MAX_REGRESSION * 100;
     const p95SpeedPass = p95.percentage === null || p95.percentage <= MAX_REGRESSION * 100;
-    const taskPass = ['evaluationCandidates', 'agentTasks', 'livenessCalls'].every((key) => (workProxy[key]?.after ?? 0) <= (workProxy[key]?.before ?? 0));
+    const taskPass = ['evaluationCandidates', 'agentTasks', 'livenessCalls'].every((key) => (syntheticWorkProxy[key]?.after ?? 0) <= (syntheticWorkProxy[key]?.before ?? 0));
     const targetedPass = !after.claimsImprovement || (median.percentage !== null && p95.percentage !== null && median.percentage < 0 && p95.percentage < 0);
-    if (!reliabilityPass) failures.push(`${name}: reliability failures introduced=${introducedWorkloadFailures.length}`);
+    if (introducedWorkloadFailures.length) failures.push(`${name}: reliability failures introduced=${introducedWorkloadFailures.length}`);
     if (!unaffectedSpeedPass || !p95SpeedPass) failures.push(`${name}: local latency regression exceeds 10%`);
     if (!taskPass) failures.push(`${name}: evaluation/liveness work proxy increased`);
     if (!targetedPass) failures.push(`${name}: targeted workload did not improve both median and p95`);
@@ -104,7 +109,7 @@ export function compareArtifacts(baseline, candidate) {
         resolved: resolvedWorkloadFailures,
         pass: reliabilityPass,
       },
-      workProxy,
+      syntheticWorkProxy,
       gates: { reliability: reliabilityPass, speedMedian: unaffectedSpeedPass, speedP95: p95SpeedPass, agentWork: taskPass, targetedImprovement: targetedPass },
     };
   }
@@ -143,10 +148,10 @@ export function renderComparison(result) {
   const lines = [`Fixture version: ${result.fixtureVersion}`, `Overall: ${result.pass ? 'PASS' : 'FAIL'}`, `Reliability observed: ${result.reliability.baseline.length} -> ${result.reliability.candidate.length}; introduced ${result.reliability.introduced.length}; resolved ${result.reliability.resolved.length}`, ''];
   for (const [name, workload] of Object.entries(result.workloads)) {
     lines.push(`${name}: median ${formatDelta(workload.median)}; p95 ${formatDelta(workload.p95)}; reliability ${workload.reliability.before} -> ${workload.reliability.after} (introduced ${workload.reliability.introduced.length}, resolved ${workload.reliability.resolved.length}); ${workload.gates.reliability && workload.gates.speedMedian && workload.gates.speedP95 && workload.gates.agentWork && workload.gates.targetedImprovement ? 'PASS' : 'FAIL'}`);
-    for (const [key, change] of Object.entries(workload.workProxy)) lines.push(`  work-proxy ${key}: ${change.before} -> ${change.after} (${change.absolute >= 0 ? '+' : ''}${change.absolute})`);
+    for (const [key, change] of Object.entries(workload.syntheticWorkProxy)) lines.push(`  synthetic-work-proxy ${key}: ${change.before} -> ${change.after} (${change.absolute >= 0 ? '+' : ''}${change.absolute})`);
   }
   if (result.tokenUsage.status === 'available') lines.push(`Actual token telemetry: input ${formatDelta(result.tokenUsage.input)}; output ${formatDelta(result.tokenUsage.output)}`);
-  else lines.push('Actual token telemetry: unavailable; work proxy is not tokens.');
+  else lines.push('Actual token telemetry unavailable; syntheticWorkProxy is fixture instrumentation, not tokens.');
   if (result.failures.length) lines.push('', 'Failures:', ...result.failures.map((failure) => `- ${failure}`));
   else if (result.reliability.resolved.length) lines.push('', 'Resolved baseline reliability failures:', ...result.reliability.resolved.map((failure) => `- ${failure}`));
   return `${lines.join('\n')}\n`;

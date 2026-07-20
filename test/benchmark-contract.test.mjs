@@ -5,7 +5,8 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { release as osRelease } from 'node:os';
 import { compareArtifacts } from '../benchmark/compare.mjs';
-import { FIXTURE_VERSION, DEFAULT_ITERATIONS, DEFAULT_WARMUPS, deduplicateUrls, measure, normalizeProviderJobs, runBenchmark, trackerTransform } from '../benchmark/run-baseline.mjs';
+import { routeLivenessResult } from '../scan.mjs';
+import { FIXTURE_VERSION, DEFAULT_ITERATIONS, DEFAULT_WARMUPS, deduplicateUrls, measure, normalizeProviderJobs, observeMalformedAddition, runBenchmark, trackerTransform } from '../benchmark/run-baseline.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const FIXTURES = join(ROOT, 'benchmark', 'fixtures');
@@ -81,28 +82,51 @@ test('benchmark summaries use measured samples and expose required statistics', 
   assert.ok(summary.stats.max >= summary.stats.min);
 });
 
-test('benchmark artifact contains speed, observed reliability, work proxy, and unavailable telemetry', () => {
+test('benchmark artifact contains speed, observed reliability, synthetic work proxy, and unavailable telemetry', () => {
   const artifact = runBenchmark({ warmups: DEFAULT_WARMUPS, iterations: DEFAULT_ITERATIONS });
   assert.equal(artifact.fixtureVersion, FIXTURE_VERSION);
   assert.equal(artifact.network, 'none');
   assert.equal(artifact.policy.warmups, DEFAULT_WARMUPS);
   assert.equal(artifact.policy.iterations, DEFAULT_ITERATIONS);
   assert.equal(artifact.telemetry.token_usage, 'unavailable');
+  assert.equal(artifact.telemetry.agent_tool_telemetry, 'unavailable');
+  assert.match(artifact.telemetry.note, /actual agent\/tool telemetry unavailable/);
   assert.equal(artifact.environment.release, osRelease());
   assert.equal(artifact.environment.platform, process.platform);
   assert.equal(artifact.environment.arch, process.arch);
   for (const name of ['tracker-250', 'tracker-1000', 'tracker-5000']) assert.ok(artifact.workloads[name]);
-  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.agentTasks, 3);
-  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.webSearchQueries, 4);
-  assert.equal(artifact.workloads['local-scan-pipeline'].workProxy.toolCalls, 9);
+  assert.equal(artifact.workloads['local-scan-pipeline'].syntheticWorkProxy.agentTasks, 3);
+  assert.equal(artifact.workloads['local-scan-pipeline'].syntheticWorkProxy.webSearchQueries, 4);
+  assert.equal(artifact.workloads['local-scan-pipeline'].syntheticWorkProxy.toolCalls, 9);
   assert.equal(artifact.reliability.status, 'KNOWN_FAILURES');
-  assert.ok(artifact.reliability.failures.some((failure) => failure.startsWith('malformed-addition:')));
+  assert.ok(artifact.reliability.failures.includes('malformed-addition'));
   assert.equal(artifact.reliability.observations['malformed-addition'], 'archived-malformed-addition');
+  assert.equal(artifact.reliability.observations['parallel-reserved-ids'], 'production-reservation-unavailable');
+  assert.deepEqual(artifact.workloads['tracker-250'].reliability.knownFailures, ['parallel-reserved-ids', 'malformed-addition']);
+  assert.deepEqual(artifact.workloads['tracker-1000'].reliability.knownFailures, []);
   for (const workload of Object.values(artifact.workloads)) {
-    for (const key of ['sourceRecords', 'acceptedRecords', 'duplicateDrops', 'livenessCalls', 'evaluationCandidates', 'agentTasks', 'webSearchQueries', 'toolCalls', 'manifestChars']) assert.equal(typeof workload.workProxy[key], 'number');
+    for (const key of ['sourceRecords', 'acceptedRecords', 'duplicateDrops', 'livenessCalls', 'evaluationCandidates', 'agentTasks', 'webSearchQueries', 'toolCalls', 'manifestChars']) assert.equal(typeof workload.syntheticWorkProxy[key], 'number');
     assert.equal(typeof workload.reliability.failures, 'number');
     assert.equal(workload.reliability.status, workload.reliability.failures === 0 ? 'PASS' : 'KNOWN_FAILURES');
   }
+});
+
+test('blacklisted liveness result routes away from verified pipeline', () => {
+  assert.equal(routeLivenessResult('uncertain', 'blacklisted'), 'blacklisted');
+  assert.notEqual(routeLivenessResult('uncertain', 'blacklisted'), 'verified');
+});
+
+test('malformed subprocess status and output are benchmark assertions', () => {
+  assert.equal(observeMalformedAddition({ runScript: () => ({ status: 23, output: '' }) }), 'subprocess-failed:23');
+  assert.equal(observeMalformedAddition({ runScript: () => ({ status: 0, output: '' }) }), 'subprocess-output-missing');
+});
+
+test('reliability failures retain structural workload association', () => {
+  const artifact = runBenchmark({ warmups: 1, iterations: 1 });
+  assert.deepEqual(artifact.reliability.failureRecords.filter(({ workload }) => workload === 'tracker-250').map(({ id }) => id), ['parallel-reserved-ids', 'malformed-addition']);
+  assert.equal(artifact.workloads['tracker-250'].reliability.failures, 2);
+  assert.equal(artifact.workloads['tracker-1000'].reliability.failures, 0);
+  assert.equal(artifact.workloads['tracker-5000'].reliability.failures, 0);
 });
 
 test('comparison self-compare passes with zero deltas', () => {
@@ -142,12 +166,21 @@ test('comparison rejects a latency regression over ten percent', () => {
 test('comparison rejects increased evaluation work and reliability failures', () => {
   const baseline = runBenchmark({ warmups: 1, iterations: 3 });
   const candidate = clone(baseline);
-  candidate.workloads['local-scan-pipeline'].workProxy.evaluationCandidates += 1;
+  candidate.workloads['local-scan-pipeline'].syntheticWorkProxy.evaluationCandidates += 1;
   candidate.workloads['local-scan-pipeline'].reliability.failures = 1;
   const result = compareArtifacts(baseline, candidate);
   assert.equal(result.pass, false);
   assert.ok(result.failures.some((failure) => failure.includes('reliability')));
   assert.ok(result.failures.some((failure) => failure.includes('work proxy')));
+});
+
+test('comparison rejects omitted known-failure IDs even when count is unchanged', () => {
+  const baseline = runBenchmark({ warmups: 1, iterations: 1 });
+  const candidate = clone(baseline);
+  candidate.workloads['tracker-250'].reliability.knownFailures = [];
+  const result = compareArtifacts(baseline, candidate);
+  assert.equal(result.pass, false);
+  assert.ok(result.failures.some((failure) => failure.includes('tracker-250') && failure.includes('known-failure IDs')));
 });
 
 test('comparison rejects fixture, Node, policy, workload, and network mismatches', () => {

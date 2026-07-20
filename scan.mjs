@@ -27,27 +27,27 @@
  *   node scan.mjs --verify         # Playwright-check each new URL; drop expired postings
  */
 
-import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
-import { pathToFileURL, fileURLToPath } from 'url';
-import path from 'path';
-import yaml from 'js-yaml';
+import { readFileSync, writeFileSync, appendFileSync, existsSync, mkdirSync, readdirSync } from "fs";
+import { pathToFileURL, fileURLToPath } from "url";
+import path from "path";
+import yaml from "js-yaml";
 
-import { makeHttpCtx } from './providers/_http.mjs';
-import { reconcileProviderJobs } from './scan-core.mjs';
-import { commitText } from './persistence-core.mjs';
+import { makeHttpCtx } from "./providers/_http.mjs";
+import { reconcileProviderJobs } from "./scan-core.mjs";
+import { commitText } from "./persistence-core.mjs";
 
 const parseYaml = yaml.load;
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const PORTALS_PATH = process.env.CAREER_OPS_PORTALS || 'portals.yml';
-const SCAN_HISTORY_PATH = 'data/scan-history.tsv';
-const PIPELINE_PATH = 'data/pipeline.md';
-const APPLICATIONS_PATH = 'data/applications.md';
-const PROVIDERS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'providers');
+const PORTALS_PATH = process.env.CAREER_OPS_PORTALS || "portals.yml";
+const SCAN_HISTORY_PATH = "data/scan-history.tsv";
+const PIPELINE_PATH = "data/pipeline.md";
+const APPLICATIONS_PATH = "data/applications.md";
+const PROVIDERS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "providers");
 
 // Ensure required directories exist (fresh setup)
-mkdirSync('data', { recursive: true });
+mkdirSync("data", { recursive: true });
 
 const CONCURRENCY = 10;
 
@@ -58,7 +58,7 @@ async function loadProviders(dir) {
   if (!existsSync(dir)) return providers;
   // Alphabetical order so detect() priority is deterministic across machines.
   const entries = readdirSync(dir)
-    .filter(f => f.endsWith('.mjs') && !f.startsWith('_'))
+    .filter((f) => f.endsWith(".mjs") && !f.startsWith("_"))
     .sort();
   for (const file of entries) {
     const full = path.join(dir, file);
@@ -70,7 +70,7 @@ async function loadProviders(dir) {
       continue;
     }
     const p = mod.default;
-    if (!p || typeof p.fetch !== 'function' || !p.id) {
+    if (!p || typeof p.fetch !== "function" || !p.id) {
       console.error(`⚠️  ${file}: skipping — default export must be { id, fetch }`);
       continue;
     }
@@ -94,8 +94,8 @@ function resolveProvider(entry, providers, { skipIds = [] } = {}) {
     return { provider: p };
   }
 
-  const localParser = providers.get('local-parser');
-  if (localParser && !skipIds.includes('local-parser')) {
+  const localParser = providers.get("local-parser");
+  if (localParser && !skipIds.includes("local-parser")) {
     try {
       const hit = localParser.detect?.(entry);
       if (hit) return { provider: localParser };
@@ -121,13 +121,13 @@ function resolveProvider(entry, providers, { skipIds = [] } = {}) {
 // ── Title filter ────────────────────────────────────────────────────
 
 function buildTitleFilter(titleFilter) {
-  const positive = (titleFilter?.positive || []).map(k => k.toLowerCase());
-  const negative = (titleFilter?.negative || []).map(k => k.toLowerCase());
+  const positive = (titleFilter?.positive || []).map((k) => k.toLowerCase());
+  const negative = (titleFilter?.negative || []).map((k) => k.toLowerCase());
 
   return (title) => {
     const lower = title.toLowerCase();
-    const hasPositive = positive.length === 0 || positive.some(k => lower.includes(k));
-    const hasNegative = negative.some(k => lower.includes(k));
+    const hasPositive = positive.length === 0 || positive.some((k) => lower.includes(k));
+    const hasNegative = negative.some((k) => lower.includes(k));
     return hasPositive && !hasNegative;
   };
 }
@@ -154,8 +154,8 @@ function normalizeKeywordList(value) {
   if (value == null) return [];
   const arr = Array.isArray(value) ? value : [value];
   return arr
-    .filter(k => typeof k === 'string')
-    .map(k => k.toLowerCase().trim())
+    .filter((k) => typeof k === "string")
+    .map((k) => k.toLowerCase().trim())
     .filter(Boolean);
 }
 
@@ -166,12 +166,12 @@ export function buildLocationFilter(locationFilter) {
   const block = normalizeKeywordList(locationFilter.block);
 
   return (location) => {
-    if (typeof location !== 'string' || location.trim() === '') return true;
+    if (typeof location !== "string" || location.trim() === "") return true;
     const lower = location.toLowerCase();
-    if (alwaysAllow.length > 0 && alwaysAllow.some(k => lower.includes(k))) return true;
-    if (block.length > 0 && block.some(k => lower.includes(k))) return false;
+    if (alwaysAllow.length > 0 && alwaysAllow.some((k) => lower.includes(k))) return true;
+    if (block.length > 0 && block.some((k) => lower.includes(k))) return false;
     if (allow.length === 0) return true;
-    return allow.some(k => lower.includes(k));
+    return allow.some((k) => lower.includes(k));
   };
 }
 
@@ -182,16 +182,17 @@ function loadSeenUrls() {
 
   // scan-history.tsv
   if (existsSync(SCAN_HISTORY_PATH)) {
-    const lines = readFileSync(SCAN_HISTORY_PATH, 'utf-8').split('\n');
-    for (const line of lines.slice(1)) { // skip header
-      const url = line.split('\t')[0];
+    const lines = readFileSync(SCAN_HISTORY_PATH, "utf-8").split("\n");
+    for (const line of lines.slice(1)) {
+      // skip header
+      const url = line.split("\t")[0];
       if (url) seen.add(url);
     }
   }
 
   // pipeline.md — extract URLs from checkbox lines
   if (existsSync(PIPELINE_PATH)) {
-    const text = readFileSync(PIPELINE_PATH, 'utf-8');
+    const text = readFileSync(PIPELINE_PATH, "utf-8");
     for (const match of text.matchAll(/- \[[ x]\] (https?:\/\/\S+)/g)) {
       seen.add(match[1]);
     }
@@ -199,7 +200,7 @@ function loadSeenUrls() {
 
   // applications.md — extract URLs from report links and any inline URLs
   if (existsSync(APPLICATIONS_PATH)) {
-    const text = readFileSync(APPLICATIONS_PATH, 'utf-8');
+    const text = readFileSync(APPLICATIONS_PATH, "utf-8");
     for (const match of text.matchAll(/https?:\/\/[^\s|)]+/g)) {
       seen.add(match[0]);
     }
@@ -211,12 +212,12 @@ function loadSeenUrls() {
 function loadSeenCompanyRoles() {
   const seen = new Set();
   if (existsSync(APPLICATIONS_PATH)) {
-    const text = readFileSync(APPLICATIONS_PATH, 'utf-8');
+    const text = readFileSync(APPLICATIONS_PATH, "utf-8");
     // Parse markdown table rows: | # | Date | Company | Role | ...
     for (const match of text.matchAll(/\|[^|]+\|[^|]+\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/g)) {
       const company = match[1].trim().toLowerCase();
       const role = match[2].trim().toLowerCase();
-      if (company && role && company !== 'company') {
+      if (company && role && company !== "company") {
         seen.add(`${company}::${role}`);
       }
     }
@@ -229,56 +230,54 @@ function loadSeenCompanyRoles() {
 function appendToPipeline(offers) {
   if (offers.length === 0) return;
 
-  const originalText = readFileSync(PIPELINE_PATH, 'utf-8');
+  const originalText = readFileSync(PIPELINE_PATH, "utf-8");
   let text = originalText;
 
-  // Find "## Pendientes" section and append after it
-  const marker = '## Pendientes';
+  // Find "## Pending" section and append after it
+  const marker = "## Pending";
   const idx = text.indexOf(marker);
   if (idx === -1) {
-    // No Pendientes section — append at end before Procesadas
-    const procIdx = text.indexOf('## Procesadas');
+    // No Pending section — append at end before Procesadas
+    const procIdx = text.indexOf("## Procesadas");
     const insertAt = procIdx === -1 ? text.length : procIdx;
-    const block = `\n${marker}\n\n` + offers.map(o =>
-      `- [ ] ${o.url} | ${o.company} | ${o.title}`
-    ).join('\n') + '\n\n';
+    const block =
+      `\n${marker}\n\n` + offers.map((o) => `- [ ] ${o.url} | ${o.company} | ${o.title}`).join("\n") + "\n\n";
     text = text.slice(0, insertAt) + block + text.slice(insertAt);
   } else {
-    // Find the end of existing Pendientes content (next ## or end)
+    // Find the end of existing Pending content (next ## or end)
     const afterMarker = idx + marker.length;
-    const nextSection = text.indexOf('\n## ', afterMarker);
+    const nextSection = text.indexOf("\n## ", afterMarker);
     const insertAt = nextSection === -1 ? text.length : nextSection;
 
-    const block = '\n' + offers.map(o =>
-      `- [ ] ${o.url} | ${o.company} | ${o.title}`
-    ).join('\n') + '\n';
+    const block = "\n" + offers.map((o) => `- [ ] ${o.url} | ${o.company} | ${o.title}`).join("\n") + "\n";
     text = text.slice(0, insertAt) + block + text.slice(insertAt);
   }
 
   const commit = commitText({
-    read: () => readFileSync(PIPELINE_PATH, 'utf-8'),
-    write: (next) => writeFileSync(PIPELINE_PATH, next, 'utf-8'),
+    read: () => readFileSync(PIPELINE_PATH, "utf-8"),
+    write: (next) => writeFileSync(PIPELINE_PATH, next, "utf-8"),
     expected: originalText,
     next: text,
   });
-  if (commit.status !== 'committed') throw new Error(`pipeline commit ${commit.status}`);
+  if (commit.status !== "committed") throw new Error(`pipeline commit ${commit.status}`);
 }
 
-function appendToScanHistory(offers, date, status = 'added') {
+function appendToScanHistory(offers, date, status = "added") {
   // Ensure file + header exist. Location appended as 7th column for non-breaking
   // backward compat — older scan-history.tsv files with 6 columns still parse fine
   // since loadSeenUrls only reads column 0. `status` is parameterized so callers
   // can record verify outcomes (`skipped_expired`, etc.) without the legacy
   // `(expired)` suffix in `source`.
   if (!existsSync(SCAN_HISTORY_PATH)) {
-    writeFileSync(SCAN_HISTORY_PATH, 'url\tfirst_seen\tportal\ttitle\tcompany\tstatus\tlocation\n', 'utf-8');
+    writeFileSync(SCAN_HISTORY_PATH, "url\tfirst_seen\tportal\ttitle\tcompany\tstatus\tlocation\n", "utf-8");
   }
 
-  const lines = offers.map(o =>
-    `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\t${status}\t${o.location || ''}`
-  ).join('\n') + '\n';
+  const lines =
+    offers
+      .map((o) => `${o.url}\t${date}\t${o.source}\t${o.title}\t${o.company}\t${status}\t${o.location || ""}`)
+      .join("\n") + "\n";
 
-  appendFileSync(SCAN_HISTORY_PATH, lines, 'utf-8');
+  appendFileSync(SCAN_HISTORY_PATH, lines, "utf-8");
 }
 
 // ── Parallel fetch with concurrency limit ───────────────────────────
@@ -307,8 +306,8 @@ async function verifyOffers(offers) {
   let checkUrlLiveness;
   let createLivenessRoutingState;
   try {
-    ({ chromium } = await import('playwright'));
-    ({ checkUrlLiveness, createLivenessRoutingState } = await import('./liveness-browser.mjs'));
+    ({ chromium } = await import("playwright"));
+    ({ checkUrlLiveness, createLivenessRoutingState } = await import("./liveness-browser.mjs"));
   } catch (err) {
     throw new Error(
       `--verify requires Playwright with Chromium (run "npx playwright install chromium"): ${err.message}`,
@@ -336,6 +335,7 @@ async function verifyOffers(offers) {
   const verified = [];
   const expired = [];
   const dropped = [];
+  const blacklisted = [];
   const invalid = [];
   const routingState = createLivenessRoutingState();
 
@@ -344,25 +344,29 @@ async function verifyOffers(offers) {
     // Sequential — project rule: never Playwright in parallel
     for (const offer of offers) {
       const { result, code, reason } = await checkUrlLiveness(page, offer.url, { routingState });
-      if (result === 'expired') {
+      if (result === "expired") {
         expired.push({ ...offer, reason });
         console.log(`  ❌ expired   ${offer.company} | ${offer.title} (${reason})`);
-      } else if (result === 'uncertain' && GUARD_CODES.has(code)) {
+      } else if (result === "uncertain" && GUARD_CODES.has(code)) {
         // Guard failures are permanent (not transient like a timeout) — record them
         // separately so they don't end up in pipeline.md but DO appear in scan-history
         // with a precise status, dedup-blocking them on subsequent scans.
         invalid.push({ ...offer, code, reason });
         console.log(`  ⛔ invalid   ${offer.company} | ${offer.title} (${reason})`);
-      } else if (result === 'uncertain' && code === 'no_apply_control') {
+      } else if (result === "uncertain" && code === "no_apply_control") {
         // Page loaded but classifier could not find an Apply control. Treat like
         // expired for routing — drop from pipeline AND record in scan-history so
         // we don't burn a verify cycle on the same URL next scan.
         dropped.push({ ...offer, reason });
         console.log(`  ⚠️ no-apply  ${offer.company} | ${offer.title} (${reason})`);
+      } else if (result === "uncertain" && code === "blacklisted") {
+        // Persistently blacklisted URLs must never re-enter the verified pipeline.
+        blacklisted.push({ ...offer, reason });
+        console.log(`  ⛔ blacklisted ${offer.company} | ${offer.title} (${reason})`);
       } else {
         // 'active' or 'uncertain' due to navigation_error (transient — retry next scan)
         verified.push(offer);
-        const icon = result === 'active' ? '✅' : '⚠️';
+        const icon = result === "active" ? "✅" : "⚠️";
         console.log(`  ${icon} ${result.padEnd(9)} ${offer.company} | ${offer.title}`);
       }
     }
@@ -370,42 +374,50 @@ async function verifyOffers(offers) {
     await browser.close();
   }
 
-  return { verified, expired, dropped, invalid };
+  return { verified, expired, dropped, invalid, blacklisted };
 }
 
 // Stable codes from liveness-browser's up-front URL guard. Routing dispatches
 // on these codes (not on regex over reason strings) so wording can change
 // without breaking the pipeline.
-const GUARD_CODES = new Set(['invalid_url', 'unsupported_protocol', 'blocked_host']);
+const GUARD_CODES = new Set(["invalid_url", "unsupported_protocol", "blocked_host"]);
+
+export function routeLivenessResult(result, code) {
+  if (result === "expired") return "expired";
+  if (result === "uncertain" && GUARD_CODES.has(code)) return "invalid";
+  if (result === "uncertain" && code === "no_apply_control") return "dropped";
+  if (result === "uncertain" && code === "blacklisted") return "blacklisted";
+  return "verified";
+}
 
 // guardStatusFor maps a guard code to the canonical scan-history status string.
 function guardStatusFor(code) {
-  if (code === 'blocked_host') return 'skipped_blocked_host';
+  if (code === "blocked_host") return "skipped_blocked_host";
   // invalid_url and unsupported_protocol both surface as malformed input
-  return 'skipped_invalid_url';
+  return "skipped_invalid_url";
 }
 
 async function main() {
   const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
-  const verify = args.includes('--verify');
-  const companyFlag = args.indexOf('--company');
+  const dryRun = args.includes("--dry-run");
+  const verify = args.includes("--verify");
+  const companyFlag = args.indexOf("--company");
   const filterCompany = companyFlag !== -1 ? args[companyFlag + 1]?.toLowerCase() : null;
 
   // 1. Load providers
   const providers = await loadProviders(PROVIDERS_DIR);
   if (providers.size === 0) {
-    console.error('Error: no providers loaded from providers/');
+    console.error("Error: no providers loaded from providers/");
     process.exit(1);
   }
 
   // 2. Read portals.yml
   if (!existsSync(PORTALS_PATH)) {
-    console.error('Error: portals.yml not found. Run onboarding first.');
+    console.error("Error: portals.yml not found. Run onboarding first.");
     process.exit(1);
   }
 
-  const config = parseYaml(readFileSync(PORTALS_PATH, 'utf-8'));
+  const config = parseYaml(readFileSync(PORTALS_PATH, "utf-8"));
   const companies = config.tracked_companies || [];
   const titleFilter = buildTitleFilter(config.title_filter);
   const locationFilter = buildLocationFilter(config.location_filter);
@@ -415,22 +427,30 @@ async function main() {
   let skippedCount = 0;
   const resolveErrors = [];
   for (const company of companies) {
-    if (!company || typeof company !== 'object') continue;
+    if (!company || typeof company !== "object") continue;
     if (company.enabled === false) continue;
-    if (typeof company.name !== 'string' || !company.name.trim()) {
+    if (typeof company.name !== "string" || !company.name.trim()) {
       console.error(`⚠️  Skipping entry — missing or non-string 'name' field: ${JSON.stringify(company)}`);
       continue;
     }
     if (filterCompany && !company.name.toLowerCase().includes(filterCompany)) continue;
     const resolved = resolveProvider(company, providers);
-    if (!resolved) { skippedCount++; continue; }
-    if (resolved.error) { resolveErrors.push({ company: company.name, error: resolved.error }); continue; }
+    if (!resolved) {
+      skippedCount++;
+      continue;
+    }
+    if (resolved.error) {
+      resolveErrors.push({ company: company.name, error: resolved.error });
+      continue;
+    }
     targets.push({ ...company, _provider: resolved.provider });
   }
 
-  const localParserCount = targets.filter(t => t._provider.id === 'local-parser').length;
-  console.log(`Scanning ${targets.length} companies via providers (${localParserCount} local parser; ${skippedCount} skipped — no provider matched)`);
-  if (dryRun) console.log('(dry run — no files will be written)\n');
+  const localParserCount = targets.filter((t) => t._provider.id === "local-parser").length;
+  console.log(
+    `Scanning ${targets.length} companies via providers (${localParserCount} local parser; ${skippedCount} skipped — no provider matched)`,
+  );
+  if (dryRun) console.log("(dry run — no files will be written)\n");
 
   // 4. Load dedup sets
   const seenUrls = loadSeenUrls();
@@ -445,17 +465,17 @@ async function main() {
   const newOffers = [];
   const errors = [...resolveErrors];
 
-  const tasks = targets.map(company => async () => {
+  const tasks = targets.map((company) => async () => {
     let provider = company._provider;
     const ctx = makeHttpCtx();
-    let sourceName = provider.id === 'local-parser' ? 'local-parser' : `${provider.id}-api`;
+    let sourceName = provider.id === "local-parser" ? "local-parser" : `${provider.id}-api`;
     try {
       let jobs;
       try {
         jobs = await provider.fetch(company, ctx);
       } catch (parserErr) {
-        if (provider.id !== 'local-parser') throw parserErr;
-        const fallback = resolveProvider(company, providers, { skipIds: ['local-parser'] });
+        if (provider.id !== "local-parser") throw parserErr;
+        const fallback = resolveProvider(company, providers, { skipIds: ["local-parser"] });
         if (!fallback || fallback.error) throw parserErr;
         provider = fallback.provider;
         sourceName = `${provider.id}-api`;
@@ -468,6 +488,7 @@ async function main() {
       if (!Array.isArray(jobs)) {
         throw new Error(`${provider.id}: fetch() did not return an array`);
       }
+      totalFound += jobs.length;
       const reconciliation = reconcileProviderJobs(jobs, {
         titleFilter,
         locationFilter,
@@ -475,7 +496,6 @@ async function main() {
         seenCompanyRoles,
         sourceName,
       });
-      totalFound += reconciliation.stats.totalFound;
       totalFilteredTitle += reconciliation.stats.totalFilteredTitle;
       totalFilteredLocation += reconciliation.stats.totalFilteredLocation;
       totalDupes += reconciliation.stats.totalDupes;
@@ -492,6 +512,7 @@ async function main() {
   let expiredOffers = [];
   let droppedOffers = [];
   let invalidOffers = [];
+  let blacklistedOffers = [];
   if (verify && newOffers.length > 0) {
     console.log(`\nVerifying liveness of ${newOffers.length} new offer(s) with Playwright (sequential)...`);
     const result = await verifyOffers(newOffers);
@@ -499,6 +520,7 @@ async function main() {
     expiredOffers = result.expired;
     droppedOffers = result.dropped;
     invalidOffers = result.invalid;
+    blacklistedOffers = result.blacklisted;
   }
 
   // 6. Write results
@@ -507,12 +529,15 @@ async function main() {
     appendToScanHistory(verifiedOffers, date);
   }
   if (!dryRun && expiredOffers.length > 0) {
-    appendToScanHistory(expiredOffers, date, 'skipped_expired');
+    appendToScanHistory(expiredOffers, date, "skipped_expired");
   }
   // Pages that loaded but had no Apply control: record so we don't re-verify
   // them next scan, but never let them reach pipeline.md.
   if (!dryRun && droppedOffers.length > 0) {
-    appendToScanHistory(droppedOffers, date, 'skipped_no_apply_control');
+    appendToScanHistory(droppedOffers, date, "skipped_no_apply_control");
+  }
+  if (!dryRun && blacklistedOffers.length > 0) {
+    appendToScanHistory(blacklistedOffers, date, "skipped_blacklisted");
   }
   // Guard-rejected URLs (invalid / unsupported protocol / blocked host) are
   // recorded with a precise status so subsequent scans dedup-skip them via
@@ -531,9 +556,9 @@ async function main() {
   }
 
   // 7. Print summary
-  console.log(`\n${'━'.repeat(45)}`);
+  console.log(`\n${"━".repeat(45)}`);
   console.log(`Portal Scan — ${date}`);
-  console.log(`${'━'.repeat(45)}`);
+  console.log(`${"━".repeat(45)}`);
   console.log(`Companies scanned:     ${targets.length}`);
   console.log(`Total jobs found:      ${totalFound}`);
   console.log(`Filtered by title:     ${totalFilteredTitle} removed`);
@@ -543,6 +568,7 @@ async function main() {
     console.log(`Expired (verified):    ${expiredOffers.length} dropped`);
     console.log(`No apply control:      ${droppedOffers.length} dropped`);
     console.log(`Invalid (guarded):     ${invalidOffers.length} dropped`);
+    console.log(`Blacklisted (persisted): ${blacklistedOffers.length} skipped`);
   }
   console.log(`New offers added:      ${verifiedOffers.length}`);
 
@@ -554,26 +580,26 @@ async function main() {
   }
 
   if (verifiedOffers.length > 0) {
-    console.log('\nNew offers:');
+    console.log("\nNew offers:");
     for (const o of verifiedOffers) {
-      console.log(`  + ${o.company} | ${o.title} | ${o.location || 'N/A'}`);
+      console.log(`  + ${o.company} | ${o.title} | ${o.location || "N/A"}`);
     }
     if (dryRun) {
-      console.log('\n(dry run — run without --dry-run to save results)');
+      console.log("\n(dry run — run without --dry-run to save results)");
     } else {
       console.log(`\nResults saved to ${PIPELINE_PATH} and ${SCAN_HISTORY_PATH}`);
     }
   }
 
   console.log(`\n→ Run /career-ops pipeline to evaluate new offers.`);
-  console.log('→ Share results and get help: https://discord.gg/8pRpHETxa4');
+  console.log("→ Share results and get help: https://discord.gg/8pRpHETxa4");
 }
 
 // Only run main() when invoked directly (`node scan.mjs`), not when imported by tests.
 // `|| ''` guards the case where Node is invoked without a script arg (e.g. `node -e`).
-if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
-  main().catch(err => {
-    console.error('Fatal:', err.message);
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+  main().catch((err) => {
+    console.error("Fatal:", err.message);
     process.exit(1);
   });
 }
