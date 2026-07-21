@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { open, readdir, readFile, rename, rm, mkdir } from 'node:fs/promises';
+import { open, readdir, readFile, rename, rm, mkdir, rmdir, stat } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +21,25 @@ function repositoryRoot(root = process.env.CAREER_OPS_ROOT) {
 
 function compactRunId(now = new Date()) {
   return now.toISOString().replaceAll(':', '-').replace('.', '-');
+}
+
+function validateRunId(runId) {
+  if (typeof runId !== 'string' || runId.length === 0) {
+    throw new TypeError('PIPELINE_RUN_ID must be a non-empty safe filename component');
+  }
+  if (
+    runId === '.' ||
+    runId === '..' ||
+    runId !== runId.trim() ||
+    runId.includes('/') ||
+    runId.includes('\\') ||
+    /[\u0000-\u001f\u007f<>:"|?*]/u.test(runId) ||
+    /[. ]$/u.test(runId) ||
+    /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/iu.test(runId)
+  ) {
+    throw new TypeError(`PIPELINE_RUN_ID is not a safe filename component: ${runId}`);
+  }
+  return runId;
 }
 
 function randomSuffix() {
@@ -119,6 +138,13 @@ async function writeManifestAtomically(path, manifest) {
     await handle.close();
     handle = undefined;
     await rename(temporaryPath, path);
+    let directoryHandle;
+    try {
+      directoryHandle = await open(dirname(path), 'r');
+      await directoryHandle.sync();
+    } finally {
+      if (directoryHandle) await directoryHandle.close();
+    }
   } catch (error) {
     if (handle) {
       try { await handle.close(); } catch { /* preserve original failure */ }
@@ -131,8 +157,10 @@ async function writeManifestAtomically(path, manifest) {
 
 async function acquireLock(lockPath, runId) {
   let handle;
+  let ownsLock = false;
   try {
     handle = await open(lockPath, 'wx');
+    ownsLock = true;
     await handle.writeFile(`${JSON.stringify({ pid: process.pid, runId, createdAt: new Date().toISOString() })}\n`, 'utf8');
     await handle.sync();
     await handle.close();
@@ -140,6 +168,9 @@ async function acquireLock(lockPath, runId) {
   } catch (error) {
     if (handle) {
       try { await handle.close(); } catch { /* preserve original failure */ }
+    }
+    if (ownsLock) {
+      try { await rm(lockPath, { force: false }); } catch { /* preserve original failure */ }
     }
     if (error.code === 'EEXIST') {
       throw new Error(`reservation lock already exists at ${lockPath}; inspect its owner and remove it only after confirming no preparation is running`);
@@ -169,15 +200,12 @@ export async function preparePipelineBatch({
   now = new Date(),
   runId = process.env.PIPELINE_RUN_ID || compactRunId(now),
 } = {}) {
+  validateRunId(runId);
   const repository = resolve(root);
   const pipelinePath = join(repository, 'data', 'pipeline.md');
   const reportsPath = join(repository, 'reports');
   const runsPath = join(repository, RUNS_RELATIVE);
   const lockPath = join(repository, LOCK_RELATIVE);
-
-  const pipelineText = await readFile(pipelinePath, 'utf8');
-  const pending = parsePendingPipeline(pipelineText);
-  if (pending.length === 0) return { status: 'empty', pending: [], manifest: null };
 
   const readInputs = async () => {
     const [reportNames, manifestRecords] = await Promise.all([
@@ -190,33 +218,63 @@ export async function preparePipelineBatch({
   };
 
   if (dryRun) {
+    const pipelineText = await readFile(pipelinePath, 'utf8');
+    const pending = parsePendingPipeline(pipelineText);
+    if (pending.length === 0) return { status: 'empty', pending: [], manifest: null };
+
     const { active, occupied } = await readInputs();
     const newPending = pending.filter((job) => !active.urls.has(job.url));
+    const newAllocations = allocateReportIds(newPending, occupied);
+    const allocationsByUrl = new Map(newAllocations.map((job) => [job.url, job]));
+    const allocations = pending.map((job) => active.urls.get(job.url) ?? allocationsByUrl.get(job.url));
     if (newPending.length === 0) {
-      return { status: 'existing', pending, allocations: pending.map((job) => active.urls.get(job.url)), manifest: null };
+      return { status: 'existing', pending, allocations, manifest: null };
     }
-    const allocations = allocateReportIds(newPending, occupied);
     const preview = makeManifest({
       runId,
       createdAt: now.toISOString(),
-      jobs: allocations,
+      jobs: newAllocations,
     });
-    return { status: 'dry-run', pending, allocations, manifest: preview, manifestPath: join(repository, RUNS_RELATIVE, `${runId}.json`) };
+    return {
+      status: 'dry-run',
+      pending,
+      allocations,
+      manifest: preview,
+      manifestPath: join(repository, RUNS_RELATIVE, `${runId}.json`),
+    };
   }
 
-  await mkdir(join(repository, 'batch'), { recursive: true });
-  await acquireLock(lockPath, runId);
+  const batchPath = join(repository, 'batch');
+  let batchExisted;
   try {
+    await stat(batchPath);
+    batchExisted = true;
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    batchExisted = false;
+  }
+  await mkdir(batchPath, { recursive: true });
+  await acquireLock(lockPath, runId);
+  let removeEmptyBatch = false;
+  try {
+    const pipelineText = await readFile(pipelinePath, 'utf8');
+    const pending = parsePendingPipeline(pipelineText);
+    if (pending.length === 0) {
+      removeEmptyBatch = !batchExisted;
+      return { status: 'empty', pending: [], manifest: null };
+    }
+
     const { active, occupied, manifestRecords } = await readInputs();
     const newPending = pending.filter((job) => !active.urls.has(job.url));
+    const newAllocations = allocateReportIds(newPending, occupied);
+    const allocationsByUrl = new Map(newAllocations.map((job) => [job.url, job]));
+    const allocations = pending.map((job) => active.urls.get(job.url) ?? allocationsByUrl.get(job.url));
     if (newPending.length === 0) {
-      const existing = pending.map((job) => active.urls.get(job.url));
-      return { status: 'existing', pending, allocations: existing, manifest: null };
+      return { status: 'existing', pending, allocations, manifest: null };
     }
 
     await mkdir(runsPath, { recursive: true });
-    const allocations = allocateReportIds(newPending, occupied);
-    const manifest = makeManifest({ runId, createdAt: now.toISOString(), jobs: allocations });
+    const manifest = makeManifest({ runId, createdAt: now.toISOString(), jobs: newAllocations });
     const manifestPath = join(runsPath, `${runId}.json`);
     if (manifestRecords.some((record) => record.path === manifestPath)) {
       throw new Error(`reservation manifest already exists at ${manifestPath}; choose a new run ID`);
@@ -225,6 +283,9 @@ export async function preparePipelineBatch({
     return { status: 'created', pending, allocations, manifest, manifestPath };
   } finally {
     await releaseLock(lockPath);
+    if (removeEmptyBatch) {
+      try { await rmdir(batchPath); } catch { /* preserve original failure */ }
+    }
   }
 }
 
@@ -273,5 +334,6 @@ export {
   compactRunId,
   makeManifest,
   readReservationManifests,
+  validateRunId,
   writeManifestAtomically,
 };

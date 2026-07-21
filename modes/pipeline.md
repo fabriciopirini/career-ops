@@ -5,14 +5,15 @@ Process job URLs stored in `data/pipeline.md`. The user adds URLs at any time an
 ## Workflow
 
 1. **Read** `data/pipeline.md` → search for `- [ ]` items in the "Pending" section
-2. **For each pending URL**:
-   a. Calculate the next sequential `REPORT_NUM` (read `reports/`, take the highest number + 1)
+2. **Reserve report IDs before processing**: run `npm run pipeline:prepare` (use `npm run pipeline:prepare -- --dry-run` to preview). Use manifest `URL → reportId` allocations exactly as printed, including reused active reservations, in original Pending order.
+3. **For each pending URL**:
+   a. Use its reserved `reportId` from the manifest; do not calculate numbers manually or allocate from `reports/`
    b. **Extract JD** using Playwright (browser_navigate + browser_snapshot) → WebFetch → WebSearch
    c. If the URL is not accessible → mark as `- [!]` with a note and continue
    d. **Execute full auto-pipeline**: Evaluation A-F → Report .md → PDF (if score >= 3.0) → Tracker
    e. **Move from "Pending" to "Processed"**: `- [x] #NNN | URL | Company | Role | Score/5 | PDF ✅/❌`
-3. **If there are 3+ pending URLs**, launch agents in parallel (Agent tool with `run_in_background`) to maximize speed.
-4. **At the end**, show summary table. **The `JD` column is MANDATORY** — the user reviews by opening the posting, so every processed job MUST link to its source URL:
+4. **If there are 3+ pending URLs**, launch agents in parallel (Agent tool with `run_in_background`) to maximize speed.
+5. **At the end**, show summary table. **The `JD` column is MANDATORY** — the user reviews by opening the posting, so every processed job MUST link to its source URL:
 
 ```
 | # | Company | Role | Score | PDF | JD | Recommended action |
@@ -51,11 +52,9 @@ Process job URLs stored in `data/pipeline.md`. The user adds URLs at any time an
 - **PDF**: If the URL points to a PDF, read it directly with the Read tool
 - **`local:` prefix**: Read the local file. Example: `local:jds/linkedin-pm-ai.md` → read `jds/linkedin-pm-ai.md`
 
-## Automatic numbering
+## Report ID dispatch
 
-1. List all files in `reports/`
-2. Extract the number from the prefix (e.g., `142-medispend...` → 142)
-3. New number = maximum found + 1
+`npm run pipeline:prepare` acquires the reservation lock, reads the current Pending snapshot, and writes a manifest under `batch/pipeline-runs/`. Dispatch each URL with its manifest `reportId`; retries reuse active URL mappings, while only newly allocated jobs are written to the new manifest.
 
 ## Source synchronization
 

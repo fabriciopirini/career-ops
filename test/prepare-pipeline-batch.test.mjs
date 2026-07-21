@@ -142,6 +142,32 @@ test('retry after a manifest exists reuses URL and writes no duplicate manifest'
   assert.deepEqual(second.allocations.map(({ reportId }) => reportId), [1]);
   assert.deepEqual((await readdir(join(root, 'batch', 'pipeline-runs'))).sort(), ['first.json']);
 });
+test('mixed retry batch returns active and new allocations in Pending order but writes only new jobs', async () => {
+  const root = await makeRepo({
+    rows: `- [ ] ${URLS[0]}\n- [ ] ${URLS[1]}`,
+    manifests: [['active.json', manifest({
+      runId: 'active',
+      jobs: [{ pipelineLine: 2, url: URLS[0], reportId: 9 }],
+    })]],
+  });
+  const result = await preparePipelineBatch({ root, now: new Date('2026-07-21T00:00:00.000Z'), runId: 'mixed' });
+  assert.equal(result.status, 'created');
+  assert.deepEqual(result.allocations.map(({ url, reportId }) => [url, reportId]), [[URLS[0], 9], [URLS[1], 10]]);
+  assert.deepEqual(result.manifest.jobs.map(({ url, reportId }) => [url, reportId]), [[URLS[1], 10]]);
+  const saved = JSON.parse(await readFile(join(root, 'batch', 'pipeline-runs', 'mixed.json'), 'utf8'));
+  assert.deepEqual(saved.jobs.map(({ url, reportId }) => [url, reportId]), [[URLS[1], 10]]);
+});
+
+test('unsafe run IDs reject traversal, separators, and nonportable filename components', async () => {
+  for (const runId of ['../escape', 'nested/id', 'nested\\id', 'CON', 'name:stream', 'trailing.']) {
+    const root = await makeRepo({ rows: '- [ ] https://jobs.example.test/new' });
+    await assert.rejects(
+      () => preparePipelineBatch({ root, runId }),
+      /PIPELINE_RUN_ID .*safe filename component/,
+    );
+    assert.equal(await pathExists(join(root, 'batch')), false, `unsafe run ID created batch: ${runId}`);
+  }
+});
 
 test('malformed existing manifest fails closed without creating a new reservation', async () => {
   const root = await makeRepo({
