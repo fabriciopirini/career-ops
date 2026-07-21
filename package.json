@@ -19,6 +19,7 @@
     "rollback": "node update-system.mjs rollback",
     "liveness": "node check-liveness.mjs",
     "scan": "node scan.mjs",
+    "pipeline:prepare": "node scripts/prepare-pipeline-batch.mjs",
     "patterns": "node analyze-patterns.mjs",
     "gemini:eval": "node gemini-eval.mjs",
     "benchmark": "node benchmark/run-baseline.mjs",
