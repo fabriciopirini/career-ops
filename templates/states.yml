@@ -9,7 +9,7 @@
 states:
   - id: evaluated
     label: Evaluated
-    aliases: [evaluada]
+    aliases: [evaluada, condicional, hold, evaluar, verificar]
     description: Offer evaluated with report, pending decision
     dashboard_group: evaluated
 
@@ -51,12 +51,12 @@ states:
 
   - id: discarded
     label: Discarded
-    aliases: [descartado, descartada, cerrada, cancelada]
+    aliases: [descartado, descartada, cerrada, cancelada, duplicado, dup, repost]
     description: Discarded by candidate or offer closed
     dashboard_group: discarded
 
   - id: skip
     label: SKIP
-    aliases: [no_aplicar, no aplicar, skip, monitor]
+    aliases: [no_aplicar, no aplicar, monitor, geo-blocker]
     description: Doesn't fit, don't apply
     dashboard_group: skip

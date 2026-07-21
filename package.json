@@ -5,6 +5,7 @@
   "scripts": {
     "doctor": "node doctor.mjs",
     "verify": "node verify-pipeline.mjs",
+    "test": "node --test",
     "resume": "node generate-resume-pdf.mjs",
     "watch:resume": "node watch-resume.mjs",
     "letter": "node generate-pdf-from-html.mjs",
