@@ -88,10 +88,20 @@ test('normalizer converts declared aliases only in candidate output', () => {
   assert.match(alias, /\| evaluada \|/);
 });
 
-test('normalizer leaves unknown status unchanged and reports it', () => {
+test('normalizer leaves unknown status unchanged and reports it once', () => {
   const unknown = validText.replace('Evaluated', 'mystery');
   const result = normalizeDocument(unknown, statesText);
   assert.equal(result.valid, false);
   assert.equal(result.content, unknown);
-  assert.ok(result.errors.some((item) => item.code === 'status'));
+  assert.equal(result.changes, 0);
+  assert.equal(result.errors.filter((item) => item.code === 'status' && item.lineNumber === 4).length, 1);
+});
+
+test('normalizer deduplicates malformed row validation without mutation', () => {
+  const malformed = `${validRow.slice(0, -1)} | extra |`;
+  const result = normalizeDocument(`${header}\n${malformed}`, statesText);
+  assert.equal(result.valid, false);
+  assert.equal(result.content, `${header}\n${malformed}`);
+  assert.equal(result.changes, 0);
+  assert.equal(result.errors.filter((item) => item.code === 'field-count' && item.lineNumber === 4).length, 1);
 });

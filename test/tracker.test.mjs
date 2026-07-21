@@ -138,3 +138,26 @@ test('aggregates malformed rows rather than stopping at first error', () => {
   assert.ok(result.errors.some((item) => item.code === 'report-identity'));
   assert.ok(result.errors.some((item) => item.code === 'report-format'));
 });
+
+test('checks independent invariants on malformed rows', () => {
+  const malformed = row.replace('Evaluated', 'Mystery').replace('Acme', 'Acme\tLabs');
+  const result = validateTrackerDocument(documentFor([malformed, row.replace('Acme', 'Other')]), registry);
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.some((item) => item.code === 'control-character'));
+  assert.ok(result.errors.some((item) => item.code === 'status'));
+  assert.ok(result.errors.some((item) => item.code === 'duplicate-entry-number'));
+  assert.ok(result.errors.some((item) => item.code === 'duplicate-report-number'));
+});
+
+test('does not validate shifted fields after field-count errors', () => {
+  const missing = [
+    '| 1 | 2026-07-21 | Acme | Role | 4/5 | Evaluated | ❌ | not-report |',
+    '| 1 | 2026-07-21 | Other | Role | Evaluated | ❌ | not-report |',
+  ];
+  const result = validateTrackerDocument(documentFor(missing), registry);
+  assert.equal(result.valid, false);
+  assert.equal(result.errors.filter((item) => item.code === 'field-count').length, 2);
+  assert.equal(result.errors.filter((item) => item.code === 'duplicate-entry-number').length, 1);
+  assert.equal(result.errors.some((item) => item.code === 'status'), false);
+  assert.equal(result.errors.some((item) => item.code === 'report-format'), false);
+});

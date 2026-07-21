@@ -80,7 +80,13 @@ export function normalizeDocument(content, statesText) {
 
   const transformed = output.join('\n');
   const validation = validateTrackerDocument(transformed, registry);
-  errors.push(...validation.errors);
+  const recordedFailures = new Set(
+    errors.map((item) => `${item.code}:${item.lineNumber}`),
+  );
+  for (const item of validation.errors) {
+    if (recordedFailures.has(`${item.code}:${item.lineNumber}`)) continue;
+    errors.push(item);
+  }
   const valid = errors.length === 0;
   return {
     content: valid ? transformed : String(content),
