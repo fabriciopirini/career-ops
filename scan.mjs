@@ -173,6 +173,13 @@ export function buildLocationFilter(locationFilter) {
   };
 }
 
+const normalizeDedupPart = value =>
+  value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+
+export function buildCompanyRoleKey(company, role) {
+  return `${normalizeDedupPart(company)}::${normalizeDedupPart(role)}`;
+}
+
 // ── Dedup ───────────────────────────────────────────────────────────
 
 function loadSeenUrls() {
@@ -212,10 +219,10 @@ function loadSeenCompanyRoles() {
     const text = readFileSync(APPLICATIONS_PATH, 'utf-8');
     // Parse markdown table rows: | # | Date | Company | Role | ...
     for (const match of text.matchAll(/\|[^|]+\|[^|]+\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/g)) {
-      const company = match[1].trim().toLowerCase();
-      const role = match[2].trim().toLowerCase();
-      if (company && role && company !== 'company') {
-        seen.add(`${company}::${role}`);
+      const company = match[1].trim();
+      const role = match[2].trim();
+      if (company && role && company.toLowerCase() !== 'company') {
+        seen.add(buildCompanyRoleKey(company, role));
       }
     }
   }
@@ -472,7 +479,7 @@ async function main() {
           totalDupes++;
           continue;
         }
-        const key = `${job.company.toLowerCase()}::${job.title.toLowerCase()}`;
+        const key = buildCompanyRoleKey(job.company, job.title);
         if (seenCompanyRoles.has(key)) {
           totalDupes++;
           continue;

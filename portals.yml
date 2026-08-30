@@ -6,10 +6,10 @@ location_filter:
     - Anywhere
     - LATAM
     - Latin America
-  allow:
-    - Remote
     - Brazil
     - Brasil
+  allow:
+    - Remote
     - AMER
     - Americas
   block:
@@ -116,6 +116,7 @@ title_filter:
     - Data
     - IT Engineer
     - Solutions Engineer
+    - Sales Engineer
     - Chief of Staff
     - GTM
     - Customer Reliability
@@ -241,8 +242,8 @@ tracked_companies:
     notes: Serverless MySQL platform.
     enabled: true
   - name: Temporal
-    careers_url: https://job-boards.greenhouse.io/temporaltechnologies
-    api: https://boards-api.greenhouse.io/v1/boards/temporaltechnologies/jobs
+    careers_url: https://temporal.io/careers
+    provider: temporal
     notes: Workflow orchestration.
     enabled: true
   - name: Prisma
@@ -308,8 +309,8 @@ tracked_companies:
     careers_url: https://jobs.ashbyhq.com/statsig
     scan_method: websearch
     scan_query: site:jobs.ashbyhq.com/statsig "Engineer" OR "Frontend"
-    notes: Feature flagging and experimentation.
-    enabled: true
+    notes: Feature flagging and experimentation. Acquired by OpenAI (2026); Ashby board dead (404 since 07-25), ex-Statsig roles now on OpenAI careers (Bellevue in-person, US hubs).
+    enabled: false
   - name: LaunchDarkly
     careers_url: https://job-boards.greenhouse.io/launchdarkly
     api: https://boards-api.greenhouse.io/v1/boards/launchdarkly/jobs
@@ -394,8 +395,7 @@ tracked_companies:
     notes: Payments infrastructure. Remote-first, strong DX.
     enabled: true
   - name: Payward (Kraken)
-    careers_url: https://job-boards.greenhouse.io/kraken
-    api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
+    careers_url: https://jobs.ashbyhq.com/kraken.com
     notes: Crypto exchange. Remote-friendly, strong frontend org. Previous employer.
     enabled: true
   - name: Coinbase
@@ -403,11 +403,6 @@ tracked_companies:
     api: https://boards-api.greenhouse.io/v1/boards/coinbase/jobs
     notes: US crypto exchange. Remote-friendly, strong frontend org.
     enabled: true
-  - name: Kraken
-    careers_url: https://job-boards.greenhouse.io/kraken
-    api: https://boards-api.greenhouse.io/v1/boards/kraken/jobs
-    notes: Crypto exchange. Remote-friendly. Duplicate - see Payward entry.
-    enabled: false
   - name: OpenAI
     careers_url: https://openai.com/careers
     scan_method: websearch
